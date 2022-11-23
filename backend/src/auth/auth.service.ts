@@ -1,6 +1,6 @@
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
-import { AuthDto } from './dto/auth.dto';
+import { AuthDto, AuthDtoSignIn } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { jwtSecret } from 'src/utils/constants';
@@ -11,7 +11,7 @@ export class AuthService {
   constructor(private prisma: PrismaService, private jwt: JwtService) {}
 
   async signup(dto: AuthDto){
-    const {email, password} = dto;
+    const {username, email, password} = dto;
     const foundUser = await this.prisma.user.findUnique({where: {email}});
 
     if (foundUser) {
@@ -22,6 +22,7 @@ export class AuthService {
 
     await this.prisma.user.create({
       data: {
+        username,
         email,
         hashedPassword,
       },
@@ -30,9 +31,9 @@ export class AuthService {
     return {message: "Sign-up was succesfull!"}
   }
 
-  async signin(dto: AuthDto, req: Request, res: Response){
-    const {email, password} = dto;
-    const foundUser = await this.prisma.user.findUnique({where: {email}});
+  async signin(dto: AuthDtoSignIn, req: Request, res: Response){
+    const {username, password} = dto;
+    const foundUser = await this.prisma.user.findUnique({where: {username}});
 
     if (!foundUser) {
       throw new BadRequestException("Wrong credentials");
@@ -49,7 +50,7 @@ export class AuthService {
 
     const token = await this.signToken({
       userId: foundUser.id,
-      email: foundUser.email,
+      username: foundUser.username,
     });
     
     if (!token) {
@@ -76,10 +77,10 @@ export class AuthService {
     return await bcrypt.compare(args.password, args.hash);
   }
 
-  async signToken(args: { userId: string; email: string }) {
+  async signToken(args: { userId: string; username:string }) {
     const payload = {
       id: args.userId,
-      email: args.email,
+      username: args.username,
     };
 
     const token = await this.jwt.signAsync(payload, {
