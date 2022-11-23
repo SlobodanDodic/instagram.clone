@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
+import AuthContext from "../../context/AuthContext";
 import useToggle from "../../hooks/useToggle";
 import { Link, useNavigate } from "react-router-dom";
 import FormInput from "../../components/Form/FormInput";
@@ -7,6 +8,7 @@ import logoText from '../../assets/logoText.png'
 import Bottom from "../../components/Form/Bottom";
 import { toast } from "react-toastify";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import axios from 'axios';
 
 const loginInputs = [
   {
@@ -18,6 +20,14 @@ const loginInputs = [
     pattern: "^[A-Za-z0-9]{3,16}$",
     required: true,
   },
+  // {
+  //   id: 2,
+  //   name: "email",
+  //   type: "email",
+  //   placeholder: "Email",
+  //   errorMessage: "It should be a valid email address!",
+  //   required: true,
+  // },
   {
     id: 2,
     name: "password",
@@ -29,21 +39,47 @@ const loginInputs = [
   },
 ];
 
-const initialState = {
-  username: '',
-  password: '',
-}
+const initialState = { username: '', password: '' }
 
 export default function Login() {
+  const { setUser } = useContext(AuthContext);
+
   const [form, setForm] = useState(initialState);
-  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useToggle(true)
+  const navigate = useNavigate();
+
+  const instance = axios.create({
+    baseURL: "http://localhost:5000/auth/",
+    withCredentials: false,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
+    }
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(form);
-    toast.success('Successfully logged!');
-    navigate('/')
+    instance
+      .post("signin", form)
+      .then((res) => {
+        setUser(form.username);
+        console.log(res.data);
+        toast.success('Successfully logged!');
+        navigate('/')
+      })
+      .catch((err) => {
+        if (err) {
+          toast.error('Response - ' + err)
+          console.log('Response - ' + err);
+        } else if (err.request) {
+          toast.error('Request - ' + err.request)
+          console.log('Request - ' + err.request);
+        } else {
+          toast.error('Error - ' + err.errorMessage)
+          console.log('Error - ' + err);
+        }
+      });
   };
 
   const onChange = (e) => {

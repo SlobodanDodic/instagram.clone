@@ -7,13 +7,9 @@ import logoText from '../../assets/logoText.png'
 import Bottom from "../../components/Form/Bottom";
 import { toast } from "react-toastify";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import axios from 'axios';
 
-const initialState = {
-  username: '',
-  email: '',
-  password: '',
-  confirmPassword: '',
-}
+const initialState = { username: '', email: '', password: '', confirmPassword: '' }
 
 export default function Registration() {
   const [form, setForm] = useState(initialState);
@@ -59,16 +55,42 @@ export default function Registration() {
     },
   ];
 
+  const onChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const instance = axios.create({
+    baseURL: "http://localhost:5000/auth/",
+    withCredentials: false,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
+    }
+  });
+
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(form);
-    toast.success('👀 Please check for conformation email and then log in...', { autoClose: 5000 });
-    toast.success('Successfully registered!');
-    navigate('/')
-  };
-
-  const onChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    instance
+      .post("signup", form)
+      .then((res) => {
+        setForm(res);
+        console.log(res.data);
+        toast.success('Successfully registered! Please check for conformation email and then log in... 👀', { autoClose: 5000 });
+        navigate('/')
+      })
+      .catch((err) => {
+        if (err) {
+          toast.error('Response - ' + err)
+          console.log('Response - ' + err);
+        } else if (err.request) {
+          toast.error('Request - ' + err.request)
+          console.log('Request - ' + err.request);
+        } else {
+          toast.error('Error - ' + err.errorMessage)
+          console.log('Error - ' + err);
+        }
+      });
   };
 
   return (

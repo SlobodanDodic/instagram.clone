@@ -7,7 +7,7 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async getMyUser(id: string, req: Request) {
-    const decodedUserInfo = req.user as { id: string; email: string };
+    const decodedUserInfo = req.user as { id: string; email: string, username: string };
 
     const foundUser = await this.prisma.user.findUnique({ where: { id } });
 
