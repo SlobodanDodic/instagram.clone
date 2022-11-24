@@ -9,6 +9,7 @@ import Bottom from "../../components/Form/Bottom";
 import { toast } from "react-toastify";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios from 'axios';
+import Spinner from "../../components/Spinner";
 
 const loginInputs = [
   {
@@ -20,14 +21,6 @@ const loginInputs = [
     pattern: "^[A-Za-z0-9]{3,16}$",
     required: true,
   },
-  // {
-  //   id: 2,
-  //   name: "email",
-  //   type: "email",
-  //   placeholder: "Email",
-  //   errorMessage: "It should be a valid email address!",
-  //   required: true,
-  // },
   {
     id: 2,
     name: "password",
@@ -42,7 +35,7 @@ const loginInputs = [
 const initialState = { username: '', password: '' }
 
 export default function Login() {
-  const { setUser } = useContext(AuthContext);
+  const { setUser, isLoading, setIsLoading } = useContext(AuthContext);
 
   const [form, setForm] = useState(initialState);
   const [showPassword, setShowPassword] = useToggle(true)
@@ -59,12 +52,11 @@ export default function Login() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(form);
+    setIsLoading(true);
     instance
       .post("signin", form)
       .then((res) => {
         setUser(form.username);
-        console.log(res.data);
         toast.success('Successfully logged!');
         navigate('/')
       })
@@ -79,12 +71,15 @@ export default function Login() {
           toast.error('Error - ' + err.errorMessage)
           console.log('Error - ' + err);
         }
-      });
+      })
+      .finally(() => setIsLoading(false));
   };
 
   const onChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+
+  if (isLoading) return <Spinner />;
 
   return (
     <div className="flex flex-col items-center justify-center w-screen md:h-screen md:flex-row">
