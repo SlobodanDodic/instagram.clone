@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
     const initialValue = JSON.parse(stored);
     return initialValue || "";
   })
+  const [isLoading, setIsLoading] = useState(false)
 
   const [postModal, setPostModal] = useToggle(false)
   const [searchModal, setSearchModal] = useToggle(false)
@@ -19,7 +20,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, setUser, postModal, setPostModal, searchModal, setSearchModal }}>
+      value={{ user, setUser, postModal, setPostModal, searchModal, setSearchModal, isLoading, setIsLoading }}>
       {children}
     </AuthContext.Provider>
   );

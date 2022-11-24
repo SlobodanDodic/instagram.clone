@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
+import AuthContext from "../../context/AuthContext";
 import useToggle from "../../hooks/useToggle";
 import { useNavigate } from "react-router-dom";
 import FormInput from "../../components/Form/FormInput";
@@ -8,10 +9,13 @@ import Bottom from "../../components/Form/Bottom";
 import { toast } from "react-toastify";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios from 'axios';
+import Spinner from "../../components/Spinner";
 
 const initialState = { username: '', email: '', password: '', confirmPassword: '' }
 
 export default function Registration() {
+  const { isLoading, setIsLoading } = useContext(AuthContext);
+
   const [form, setForm] = useState(initialState);
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useToggle(true)
@@ -70,7 +74,7 @@ export default function Registration() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(form);
+    setIsLoading(true);
     instance
       .post("signup", form)
       .then((res) => {
@@ -90,8 +94,11 @@ export default function Registration() {
           toast.error('Error - ' + err.errorMessage)
           console.log('Error - ' + err);
         }
-      });
+      })
+      .finally(() => setIsLoading(false));
   };
+
+  if (isLoading) return <Spinner />;
 
   return (
     <div className="flex flex-col items-center justify-center w-screen md:h-screen md:flex-row">
