@@ -1,4 +1,5 @@
 import { createContext, useEffect, useState } from "react";
+import useToggle from "../hooks/useToggle";
 
 const AuthContext = createContext({});
 
@@ -9,13 +10,16 @@ export const AuthProvider = ({ children }) => {
     return initialValue || "";
   })
 
+  const [postModal, setPostModal] = useToggle(false)
+  const [searchModal, setSearchModal] = useToggle(false)
+
   useEffect(() => {
     localStorage.setItem('logged-user', JSON.stringify(user));
   }, [user]);
 
   return (
     <AuthContext.Provider
-      value={{ user, setUser }}>
+      value={{ user, setUser, postModal, setPostModal, searchModal, setSearchModal }}>
       {children}
     </AuthContext.Provider>
   );

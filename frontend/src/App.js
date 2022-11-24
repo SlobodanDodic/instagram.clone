@@ -4,6 +4,8 @@ import { ToastContainer } from "react-toastify";
 // Components
 import AuthContext from "./context/AuthContext";
 import PrivateRoutes from './components/PrivateRoutes'
+import Search from "./components/Search";
+import CreatePost from "./components/CreatePost";
 // Logged-out pages
 import Login from './pages/logged-out/Login'
 import Registration from './pages/logged-out/Registration'
@@ -23,6 +25,8 @@ export default function App() {
       <ToastContainer autoClose={1500} pauseOnFocusLoss={false} pauseOnHover={false} theme="dark" />
 
       <BrowserRouter>
+        <Search />
+        <CreatePost />
 
         {!!user && <Topbar />}
         <Routes>
@@ -33,7 +37,7 @@ export default function App() {
           <Route element={<PrivateRoutes />}>
             <Route path="/account" element={<AccountPage />} />
             <Route path="/discover" element={<DiscoverPage />} />
-            <Route path='/' element={<HomePage />} />
+            <Route path='/' exact element={<HomePage />} />
             <Route path='/profile/:username' element={<ProfilePage />} />
           </Route>
         </Routes>

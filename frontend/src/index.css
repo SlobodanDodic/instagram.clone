@@ -22,13 +22,13 @@ body {
 
 @layer components {
   .btn-add {
-    @apply items-center w-full px-5 py-2 mt-1 text-white bg-blue-400 rounded hover:cursor-pointer;
+    @apply items-center w-full px-5 py-2 mt-1 text-white bg-blue-500 rounded hover:cursor-pointer;
   }
   .btn-follow {
     @apply w-full p-2 mx-auto text-white bg-gray-800 rounded md:w-1/2 hover:cursor-pointer;
   }
   .btn-unfollow {
-    @apply w-full p-2 mx-auto text-white bg-blue-400 rounded md:w-1/2 hover:cursor-pointer;
+    @apply w-full p-2 mx-auto text-white bg-blue-500 rounded md:w-1/2 hover:cursor-pointer;
   }
   .inputs {
     @apply block w-full p-3 mt-1 text-sm text-gray-700 transition ease-in-out border border-gray-400 border-solid rounded md:w-full bg-gray-50 focus:text-gray-700 focus:bg-white focus:border-gray-900 focus:outline-none;
