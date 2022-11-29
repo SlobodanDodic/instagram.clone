@@ -62,7 +62,7 @@ export default function Login() {
       })
       .catch((err) => {
         if (err) {
-          toast.error('Response - ' + err)
+          toast.error('Please confirm your email first!')
           console.log('Response - ' + err);
         } else if (err.request) {
           toast.error('Request - ' + err.request)
