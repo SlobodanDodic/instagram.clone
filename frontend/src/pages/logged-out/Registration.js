@@ -15,7 +15,6 @@ const initialState = { username: '', email: '', password: '', confirmPassword: '
 
 export default function Registration() {
   const { isLoading, setIsLoading } = useContext(AuthContext);
-
   const [form, setForm] = useState(initialState);
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useToggle(true)
@@ -85,7 +84,7 @@ export default function Registration() {
       })
       .catch((err) => {
         if (err) {
-          toast.error('Response - ' + err)
+          toast.error('Email already exists!')
           console.log('Response - ' + err);
         } else if (err.request) {
           toast.error('Request - ' + err.request)

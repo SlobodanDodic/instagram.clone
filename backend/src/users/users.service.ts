@@ -4,7 +4,7 @@ import { PrismaService } from 'prisma/prisma.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async getMyUser(id: string, req: Request) {
     const decodedUserInfo = req.user as { id: string; email: string, username: string };
@@ -26,7 +26,7 @@ export class UsersService {
 
   async getUsers() {
     const users = await this.prisma.user.findMany({
-      select: { id: true, email: true },
+      select: { id: true, username: true, email: true, isActivated: true },
     });
 
     return { users };
