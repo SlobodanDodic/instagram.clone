@@ -84,7 +84,7 @@ export default function Registration() {
       })
       .catch((err) => {
         if (err) {
-          toast.error('Email already exists!')
+          toast.error('Email or Username already exists!')
           console.log('Response - ' + err);
         } else if (err.request) {
           toast.error('Request - ' + err.request)

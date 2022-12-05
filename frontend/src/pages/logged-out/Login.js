@@ -62,7 +62,7 @@ export default function Login() {
       })
       .catch((err) => {
         if (err) {
-          toast.error('Please confirm your email first!')
+          toast.error('Response - ' + err)
           console.log('Response - ' + err);
         } else if (err.request) {
           toast.error('Request - ' + err.request)
@@ -102,7 +102,7 @@ export default function Login() {
 
             <button onClick={setShowPassword} className='absolute text-xs font-bold right-5 bottom-32'>{showPassword ? <FaEye className="eyeStyle" /> : <FaEyeSlash className="eyeStyle" />}</button>
 
-            <Link to='/password-reset' className='text-center text-blue-900 mt-7'>Forgot password?</Link>
+            <Link to='/forgot-password' className='text-center text-blue-900 mt-7'>Forgot password?</Link>
           </div>
 
         </div>

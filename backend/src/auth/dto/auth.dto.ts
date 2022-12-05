@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsEmail, Length, MinLength, IsBoolean } from 'class-validator';
+import { IsNotEmpty, IsString, IsEmail, Length, MinLength, IsBoolean, isString, IsEmpty, IsOptional } from 'class-validator';
 
 export class AuthDto {
   @IsNotEmpty()
@@ -17,6 +17,10 @@ export class AuthDto {
 
   @IsBoolean()
   public isActivated?: boolean = false;
+
+  @IsOptional()
+  @IsString()
+  public token: string;
 }
 
 export class AuthDtoSignIn {
@@ -31,4 +35,15 @@ export class AuthDtoSignIn {
 
   @IsBoolean()
   public isActivated?: boolean = false;
+}
+
+export class AuthDtoForgot {
+  @IsNotEmpty()
+  @IsString()
+  @IsEmail()
+  public email: string;
+
+  @IsOptional()
+  @IsString()
+  public token: string;
 }

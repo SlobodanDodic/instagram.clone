@@ -13,6 +13,7 @@ model User {
   username String @unique
   email String  @unique
   hashedPassword String
+  token String @unique
   isActivated Boolean @default(false)
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt()

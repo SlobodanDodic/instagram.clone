@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Patch, Post, Put, Request, Response } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthDto, AuthDtoSignIn } from './dto/auth.dto';
+import { AuthDto, AuthDtoForgot, AuthDtoSignIn } from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -22,7 +22,17 @@ export class AuthController {
   }
 
   @Patch('active/:username')
-  update(@Param('username') username: string, @Body() isActivated: boolean) {
+  update(@Param('username') username: string, @Body("isActivated") isActivated: boolean) {
     return this.authService.update(username, isActivated);
+  }
+
+  @Post('forgotPassword')
+  forgot(@Body() dto: AuthDtoForgot) {
+    return this.authService.forgot(dto);
+  }
+
+  @Patch('resetPassword/:token')
+  reset(@Param('token') token: string, @Body("password") password: string) {
+    return this.authService.reset(token, password);
   }
 }
