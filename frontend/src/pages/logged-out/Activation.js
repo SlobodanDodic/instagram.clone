@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from 'axios';
 import Spinner from '../../components/Spinner';
+import { BsCheck2Circle } from 'react-icons/bs';
 
 export default function Activation() {
   const { isLoading, setIsLoading } = useContext(AuthContext);
@@ -25,7 +26,6 @@ export default function Activation() {
     instance
       .patch("active/" + username, { isActivated })
       .then((res) => {
-        console.log(res);
         toast.success('Successfully activated!');
         navigate('/login')
       })
@@ -47,8 +47,12 @@ export default function Activation() {
   if (isLoading) return <Spinner />;
 
   return (
-    <div>
-      <button onClick={handleSubmit}>Your mail is now active! Please click to SIGN IN from login page...</button>
+    <div className="flex items-center justify-center w-screen h-screen">
+      <div className="flex flex-col items-center justify-center w-screen mb-24">
+        <BsCheck2Circle className="text-blue-600 w-28 h-28" />
+        <h1 className="my-5 text-3xl text-blue-600">Your mail is now active! </h1>
+        <button className="w-auto font-bold tracking-wider bg-blue-600 btn-add" onClick={handleSubmit}>LOGIN PAGE</button>
+      </div>
     </div>
   )
 }

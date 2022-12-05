@@ -1,6 +1,6 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
-import { AuthDto, AuthDtoSignIn } from './dto/auth.dto';
+import { AuthDto, AuthDtoForgot, AuthDtoSignIn } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { Request, Response } from 'express';
@@ -16,10 +16,17 @@ export class AuthService {
 
   async signup(dto: AuthDto) {
     const { username, email, password, isActivated } = dto;
-    const foundUser = await this.prisma.user.findUnique({ where: { email } });
+    const foundUserEmail = await this.prisma.user.findUnique({ where: { email } });
+    const foundUsername = await this.prisma.user.findUnique({ where: { username } });
 
-    if (foundUser) {
+    const signUpToken = Math.random().toString(20).substring(2, 12);
+
+    if (foundUserEmail) {
       throw new BadRequestException("Email already exists");
+    }
+
+    if (foundUsername) {
+      throw new BadRequestException("Username already exists");
     }
 
     const hashedPassword = await this.hashPassword(password);
@@ -29,7 +36,8 @@ export class AuthService {
         username,
         email,
         hashedPassword,
-        isActivated
+        isActivated,
+        token: signUpToken
       },
     });
 
@@ -46,7 +54,7 @@ export class AuthService {
         console.log(err, 'Error sending email');
       });
 
-    return { message: "Sign-up was succesfull! Please check your email box..." }
+    return { message: "Sign-up was successfull! Please check your email box..." }
   }
 
   async signin(dto: AuthDtoSignIn, req: Request, res: Response) {
@@ -88,13 +96,51 @@ export class AuthService {
   async update(username: string, isActivated: boolean) {
     return this.prisma.user.update({
       where: { username },
-      data: isActivated,
+      data: { isActivated: isActivated },
     });
   }
 
+  async forgot(dto: AuthDtoForgot) {
+    const { email } = dto;
+    const foundUser = await this.prisma.user.findUnique({ where: { email } });
+
+    await this.mailService.sendMail({
+      to: foundUser.email,
+      from: process.env.MAIL_FROM,
+      subject: 'Reset your password',
+      template: '/email',
+      html: `<a href='http://localhost:3000/reset-password/${foundUser.token}'>Click here to change your password</a>`,
+    }).then((res) => {
+      console.log(res, 'Email is sent');
+    })
+      .catch((err) => {
+        console.log(err, 'Error sending email');
+      });
+
+    return { message: "Link for password change was successfully sent! Please check your email box..." }
+  }
+
+  async reset(token: string, password: string) {
+    const hashedPassword = await this.hashPassword(password);
+
+    return this.prisma.user.update({
+      where: { token },
+      data: { hashedPassword: hashedPassword },
+    });
+  }
+
+  // helper functions
+
   async hashPassword(password: string) {
     const saltOrRounds = 10;
-    return await bcrypt.hash(password, saltOrRounds);
+
+    try {
+      const salt = await bcrypt.genSalt(saltOrRounds)
+      return await bcrypt.hash(password, salt)
+    } catch (error) {
+      console.log(error)
+    }
+    return null
   }
 
   async comparePasswords(args: { hash: string; password: string }) {

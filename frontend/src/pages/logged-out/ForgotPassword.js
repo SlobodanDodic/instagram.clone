@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
+import AuthContext from "../../context/AuthContext";
 import FormInput from "../../components/Form/FormInput";
 import logScreen from '../../assets/logScreen.png'
 import logoText from '../../assets/logoText.png'
 import Bottom from "../../components/Form/Bottom";
+import Spinner from "../../components/Spinner";
 import { toast } from "react-toastify";
+import axios from 'axios';
 
 const loginInputs = [
   {
@@ -16,18 +19,50 @@ const loginInputs = [
   },
 ];
 
-export default function PasswordReset() {
+export default function ForgotPassword() {
   const [form, setForm] = useState({ email: '' });
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(form);
-    toast.success('Reset email sent! ✉️');
-  };
+  const { isLoading, setIsLoading } = useContext(AuthContext);
 
   const onChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+
+  const instance = axios.create({
+    baseURL: "http://localhost:5000/auth/",
+    withCredentials: false,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
+    }
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    instance
+      .post("forgotPassword", form)
+      .then((res) => {
+        setForm(res);
+        console.log(res.data);
+        toast.success('Please check for email and then follow the link... 👀', { autoClose: 5000 });
+        setForm({ email: '' })
+      })
+      .catch((err) => {
+        if (err) {
+          toast.error('Email already exists!')
+          console.log('Response - ' + err);
+        } else if (err.request) {
+          toast.error('Request - ' + err.request)
+          console.log('Request - ' + err.request);
+        } else {
+          toast.error('Error - ' + err.errorMessage)
+          console.log('Error - ' + err);
+        }
+      })
+      .finally(() => setIsLoading(false));
+  };
+
+  if (isLoading) return <Spinner />;
 
   return (
     <div className="flex flex-col items-center justify-center w-screen md:h-screen md:flex-row">

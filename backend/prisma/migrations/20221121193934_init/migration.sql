@@ -5,6 +5,7 @@ CREATE TABLE "User" (
     "username" TEXT NOT NULL,
     "hashedPassword" TEXT NOT NULL,
     "isActivated" BOOLEAN NOT NULL,
+    "token" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updateAt" TIMESTAMP(3) NOT NULL
 );

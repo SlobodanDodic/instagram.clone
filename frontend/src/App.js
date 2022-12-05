@@ -9,8 +9,9 @@ import CreatePost from "./components/CreatePost";
 // Logged-out pages
 import Login from './pages/logged-out/Login'
 import Registration from './pages/logged-out/Registration'
-import PasswordReset from './pages/logged-out/PasswordReset'
 import Activation from "./pages/logged-out/Activation";
+import ForgotPassword from "./pages/logged-out/ForgotPassword";
+import ResetPassword from "./pages/logged-out/ResetPassword";
 // Logged-in pages
 import Topbar from "./components/Topbar";
 import AccountPage from './pages/logged-in/AccountPage'
@@ -33,7 +34,8 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/registration" element={<Registration />} />
-          <Route path='/password-reset' element={<PasswordReset />} />
+          <Route path='/reset-password/:token' element={<ResetPassword />} />
+          <Route path='/forgot-password' element={<ForgotPassword />} />
           <Route path='active/:username' element={<Activation />} />
 
           <Route element={<PrivateRoutes />}>
