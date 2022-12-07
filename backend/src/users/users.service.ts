@@ -6,16 +6,16 @@ import { PrismaService } from 'prisma/prisma.service';
 export class UsersService {
   constructor(private prisma: PrismaService) { }
 
-  async getMyUser(id: string, req: Request) {
-    const decodedUserInfo = req.user as { id: string; email: string, username: string };
+  async getMyUser(username: string, req: Request) {
+    const decodedUserInfo = req.user as { username: string; email: string };
 
-    const foundUser = await this.prisma.user.findUnique({ where: { id } });
+    const foundUser = await this.prisma.user.findUnique({ where: { username } });
 
     if (!foundUser) {
       throw new NotFoundException();
     }
 
-    if (foundUser.id !== decodedUserInfo.id) {
+    if (foundUser.username !== decodedUserInfo.username) {
       throw new ForbiddenException();
     }
 

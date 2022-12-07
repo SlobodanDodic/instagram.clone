@@ -6,7 +6,6 @@ import logoText from '../../assets/logoText.png'
 import Bottom from "../../components/Form/Bottom";
 import Spinner from "../../components/Spinner";
 import { toast } from "react-toastify";
-import axios from 'axios';
 
 const loginInputs = [
   {
@@ -21,29 +20,19 @@ const loginInputs = [
 
 export default function ForgotPassword() {
   const [form, setForm] = useState({ email: '' });
-  const { isLoading, setIsLoading } = useContext(AuthContext);
+  const { isLoading, setIsLoading, instance } = useContext(AuthContext);
 
   const onChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const instance = axios.create({
-    baseURL: "http://localhost:5000/auth/",
-    withCredentials: false,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
-    }
-  });
-
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsLoading(true);
     instance
-      .post("forgotPassword", form)
+      .post("auth/forgotPassword", form)
       .then((res) => {
         setForm(res);
-        console.log(res.data);
         toast.success('Please check for email and then follow the link... 👀', { autoClose: 5000 });
         setForm({ email: '' })
       })

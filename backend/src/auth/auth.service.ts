@@ -96,7 +96,7 @@ export class AuthService {
   async update(username: string, isActivated: boolean) {
     return this.prisma.user.update({
       where: { username },
-      data: { isActivated: isActivated },
+      data: { isActivated: true },
     });
   }
 
@@ -126,6 +126,42 @@ export class AuthService {
     return this.prisma.user.update({
       where: { token },
       data: { hashedPassword: hashedPassword },
+    });
+  }
+
+  async updateAccount(token: string, dto: AuthDto) {
+    const { username, email, password, isActivated } = dto;
+    const hashedPassword = await this.hashPassword(password);
+
+    await this.mailService.sendMail({
+      to: email,
+      from: process.env.MAIL_FROM,
+      subject: 'Confirmation email',
+      template: '/email',
+      html: `<a href='http://localhost:3000/active/${username}'>Click here to confirm your email</a>`,
+    }).then((res) => {
+      console.log(res, 'Email is sent');
+    })
+      .catch((err) => {
+        console.log(err, 'Error sending email');
+      });
+
+    return this.prisma.user.update({
+      where: { token },
+      data: {
+        username,
+        email,
+        hashedPassword,
+        isActivated,
+      },
+    });
+  }
+
+  async delete(username: string) {
+    console.log(username);
+
+    return this.prisma.user.delete({
+      where: { username },
     });
   }
 

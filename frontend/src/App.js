@@ -6,6 +6,7 @@ import AuthContext from "./context/AuthContext";
 import PrivateRoutes from './components/PrivateRoutes'
 import Search from "./components/Search";
 import CreatePost from "./components/CreatePost";
+import ConfirmDelete from "./components/ConfirmDelete";
 // Logged-out pages
 import Login from './pages/logged-out/Login'
 import Registration from './pages/logged-out/Registration'
@@ -29,6 +30,7 @@ export default function App() {
       <BrowserRouter>
         <Search />
         <CreatePost />
+        <ConfirmDelete />
 
         {!!user && <Topbar />}
         <Routes>
@@ -39,7 +41,7 @@ export default function App() {
           <Route path='active/:username' element={<Activation />} />
 
           <Route element={<PrivateRoutes />}>
-            <Route path="/account" element={<AccountPage />} />
+            <Route path="/account/:token" element={<AccountPage />} />
             <Route path="/discover" element={<DiscoverPage />} />
             <Route path='/' exact element={<HomePage />} />
             <Route path='/profile/:username' element={<ProfilePage />} />

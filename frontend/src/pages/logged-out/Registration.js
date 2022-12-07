@@ -8,13 +8,12 @@ import logoText from '../../assets/logoText.png'
 import Bottom from "../../components/Form/Bottom";
 import { toast } from "react-toastify";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import axios from 'axios';
 import Spinner from "../../components/Spinner";
 
 const initialState = { username: '', email: '', password: '', confirmPassword: '' }
 
 export default function Registration() {
-  const { isLoading, setIsLoading } = useContext(AuthContext);
+  const { isLoading, setIsLoading, instance } = useContext(AuthContext);
   const [form, setForm] = useState(initialState);
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useToggle(true)
@@ -62,20 +61,11 @@ export default function Registration() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const instance = axios.create({
-    baseURL: "http://localhost:5000/auth/",
-    withCredentials: false,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
-    }
-  });
-
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsLoading(true);
     instance
-      .post("signup", form)
+      .post("auth/signup", form)
       .then((res) => {
         setForm(res);
         console.log(res.data);

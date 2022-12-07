@@ -7,10 +7,9 @@ import Bottom from "../../components/Form/Bottom";
 import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
 import Spinner from "../../components/Spinner";
-import axios from 'axios';
 
 export default function ResetPassword() {
-  const { isLoading, setIsLoading } = useContext(AuthContext);
+  const { isLoading, setIsLoading, instance } = useContext(AuthContext);
   const [form, setForm] = useState({ password: '', confirmPassword: '' });
   const signUpText = 'Login with new passport.'
   const navigate = useNavigate();
@@ -41,19 +40,10 @@ export default function ResetPassword() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const instance = axios.create({
-    baseURL: "http://localhost:5000/auth/",
-    withCredentials: false,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, PUT, POST, DELETE, PATCH, OPTIONS',
-    }
-  });
-
   const handleSubmit = () => {
     setIsLoading(true);
     instance
-      .patch("resetPassword/" + token, { password: form.password })
+      .patch("auth/resetPassword/" + token, { password: form.password })
       .then((res) => {
         toast.success('Password successfully changed. Please login!');
         navigate('/login')
