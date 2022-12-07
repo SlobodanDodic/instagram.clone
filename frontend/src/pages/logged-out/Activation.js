@@ -2,29 +2,19 @@ import { useContext } from "react";
 import AuthContext from "../../context/AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import axios from 'axios';
 import Spinner from '../../components/Spinner';
 import { BsCheck2Circle } from 'react-icons/bs';
 
 export default function Activation() {
-  const { isLoading, setIsLoading } = useContext(AuthContext);
+  const { isLoading, setIsLoading, instance } = useContext(AuthContext);
   const isActivated = true;
   const navigate = useNavigate();
   const { username } = useParams();
 
-  const instance = axios.create({
-    baseURL: "http://localhost:5000/auth/",
-    withCredentials: false,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
-    }
-  });
-
   const handleSubmit = () => {
     setIsLoading(true);
     instance
-      .patch("active/" + username, { isActivated })
+      .patch("auth/active/" + username, { isActivated })
       .then((res) => {
         toast.success('Successfully activated!');
         navigate('/login')

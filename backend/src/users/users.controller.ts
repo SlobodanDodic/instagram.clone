@@ -4,12 +4,12 @@ import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @UseGuards(JwtAuthGuard)
-  @Get('me/:id')
-  getMyUser(@Param() params: { id: string }, @Req() req) {
-    return this.usersService.getMyUser(params.id, req);
+  @Get('me/:username')
+  getMyUser(@Param() params: { username: string }, @Req() req) {
+    return this.usersService.getMyUser(params.username, req);
   }
 
   @Get()

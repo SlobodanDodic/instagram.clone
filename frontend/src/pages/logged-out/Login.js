@@ -8,7 +8,6 @@ import logoText from '../../assets/logoText.png'
 import Bottom from "../../components/Form/Bottom";
 import { toast } from "react-toastify";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import axios from 'axios';
 import Spinner from "../../components/Spinner";
 
 const loginInputs = [
@@ -35,26 +34,17 @@ const loginInputs = [
 const initialState = { username: '', password: '' }
 
 export default function Login() {
-  const { setUser, isLoading, setIsLoading } = useContext(AuthContext);
+  const { setUser, isLoading, setIsLoading, instance } = useContext(AuthContext);
 
   const [form, setForm] = useState(initialState);
   const [showPassword, setShowPassword] = useToggle(true)
   const navigate = useNavigate();
 
-  const instance = axios.create({
-    baseURL: "http://localhost:5000/auth/",
-    withCredentials: false,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
-    }
-  });
-
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsLoading(true);
     instance
-      .post("signin", form)
+      .post("auth/signin", form)
       .then((res) => {
         setUser(form.username);
         toast.success('Successfully logged!');
