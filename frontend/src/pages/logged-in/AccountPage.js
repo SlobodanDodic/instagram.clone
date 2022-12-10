@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import AuthContext from '../../context/AuthContext';
 import useToggle from '../../hooks/useToggle';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
@@ -9,11 +9,9 @@ import { toast } from "react-toastify";
 const initialState = { username: '', email: '', password: '', confirmPassword: '' }
 
 export default function AccountPage() {
-  const { user, setUser, instance, isLoading, setIsLoading, setDeleteModal } = useContext(AuthContext);
+  const { setUser, instance, isLoading, setIsLoading, setDeleteModal, loggedUser, token } = useContext(AuthContext);
   const [form, setForm] = useState(initialState);
-  const [loggedUser, setLoggedUser] = useState({});
   const [showPassword, setShowPassword] = useToggle(true)
-  const [token, setToken] = useState('')
 
   const regInputs = [
     {
@@ -57,19 +55,6 @@ export default function AccountPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  useEffect(() => {
-    instance
-      .get("users/me/" + user)
-      .then((res) => {
-        setLoggedUser(res.data?.user);
-        setToken(res.data?.user?.token);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-    // eslint-disable-next-line
-  }, [user])
-
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -79,7 +64,7 @@ export default function AccountPage() {
         setForm(res);
         toast.success('Account was successfully updated and confirmation email was sent! 📧', { autoClose: 5000 });
         setForm(initialState);
-        setUser('');
+        setUser(null);
       })
       .catch((err) => {
         if (err) {
@@ -120,7 +105,8 @@ export default function AccountPage() {
       </div>
 
       <div className="relative flex flex-col items-center justify-center w-full p-4 shadow-md md:w-96">
-        <div className="flex items-center justify-center w-full py-3 text-sm text-white bg-blue-500 rounded-t">Delete your account?</div>
+        {/* <div className="flex items-center justify-center w-full py-3 text-sm text-blue-500 rounded-t">Delete your account?</div> */}
+        <h2 className="flex items-center justify-center w-full py-3 text-sm text-blue-500 rounded-t">Delete your account?</h2>
         <div className='flex mx-auto mt-4 w-44'>
           <button className='my-4 bg-red-500 btn-add' onClick={setDeleteModal}>Delete</button>
         </div>
