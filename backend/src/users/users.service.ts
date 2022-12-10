@@ -6,6 +6,11 @@ import { PrismaService } from 'prisma/prisma.service';
 export class UsersService {
   constructor(private prisma: PrismaService) { }
 
+  async findAll() {
+    const users = await this.prisma.user.findMany({ select: { username: true, email: true } });
+    return { users };
+  }
+
   async getMyUser(username: string, req: Request) {
     const decodedUserInfo = req.user as { username: string; email: string };
 
@@ -14,21 +19,22 @@ export class UsersService {
     if (!foundUser) {
       throw new NotFoundException();
     }
-
     if (foundUser.username !== decodedUserInfo.username) {
       throw new ForbiddenException();
     }
-
     delete foundUser.hashedPassword;
 
     return { user: foundUser };
   }
 
-  async getUsers() {
-    const users = await this.prisma.user.findMany({
-      select: { id: true, username: true, email: true, isActivated: true },
-    });
+  async findUsers(username: string) {
+    return await this.prisma.user.findMany({ where: { username: { contains: username } } });
+  }
 
-    return { users };
+  async updateProfile(username: string, profileImage: string, bio: string) {
+    return this.prisma.user.update({
+      where: { username },
+      data: { profileImage: profileImage, bio: bio },
+    });
   }
 }

@@ -8,9 +8,11 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const stored = localStorage.getItem("logged-user");
     const initialValue = JSON.parse(stored);
-    return initialValue || "";
+    return initialValue || null;
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [loggedUser, setLoggedUser] = useState({});
+  const [token, setToken] = useState('')
 
   const [postModal, setPostModal] = useToggle(false)
   const [searchModal, setSearchModal] = useToggle(false)
@@ -30,9 +32,24 @@ export const AuthProvider = ({ children }) => {
     }
   });
 
+  useEffect(() => {
+    if (user) {
+      instance
+        .get("users/me/" + user)
+        .then((res) => {
+          setLoggedUser(res.data?.user);
+          setToken(res.data?.user?.token);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+    // eslint-disable-next-line
+  }, [user])
+
   return (
     <AuthContext.Provider
-      value={{ user, setUser, postModal, setPostModal, searchModal, setSearchModal, deleteModal, setDeleteModal, isLoading, setIsLoading, instance }}>
+      value={{ user, setUser, postModal, setPostModal, searchModal, setSearchModal, deleteModal, setDeleteModal, isLoading, setIsLoading, loggedUser, setLoggedUser, token, setToken, instance }}>
       {children}
     </AuthContext.Provider>
   );

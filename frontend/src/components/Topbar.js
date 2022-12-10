@@ -14,14 +14,14 @@ import logo from '../assets/logo.png';
 import avatar from '../assets/avatar.jpeg';
 
 export default function Topbar() {
-  const { setUser, user, setPostModal, setSearchModal } = useContext(AuthContext);
+  const { setUser, user, setPostModal, setSearchModal, loggedUser } = useContext(AuthContext);
   const [open, setOpen] = useToggle(false);
 
   const iconStyle = { height: "1.45rem", width: "1.45rem", marginRight: "1rem" }
   const iconStyleDrop = { height: "1.25rem", width: "1.25rem", marginRight: "1rem" }
 
   const signOut = () => {
-    setUser('');
+    setUser(null);
     toast.success('Successfully logged out!');
   }
 
@@ -43,7 +43,7 @@ export default function Topbar() {
               <img src={avatar} alt="avatar-profile" className='inline object-cover w-6 h-6 border rounded-full' />
               <span className="pb-1 ml-1 text-gray-dark">⌵</span>
               <div className={open ? "absolute right-0 flex flex-col w-screen px-2 bg-white border-b border-l border-gray top-12 rounded-l-md" : 'hidden'}>
-                <Link to={"/profile/" + user} className='flex flex-row items-center justify-end py-1 my-1 rounded hover:bg-gray/10'><h1 className='inline mr-5 text-xs capitalize' >@{user}</h1><MdEditNote style={iconStyleDrop} /></Link>
+                <Link to={"/profile/" + user} state={{ data: loggedUser }} className='flex flex-row items-center justify-end py-1 my-1 rounded hover:bg-gray/10'><h1 className='inline mr-5 text-xs capitalize' >@{user}</h1><MdEditNote style={iconStyleDrop} /></Link>
                 <Link to={'/account/' + user} className='flex flex-row items-center justify-end py-1 my-1 rounded hover:bg-gray/10'><h1 className='inline mr-5 text-xs' >Account</h1><MdOutlineSettingsSuggest style={iconStyleDrop} /></Link>
                 <Link onClick={signOut} className='flex flex-row items-center justify-end py-1 my-1 rounded hover:bg-gray/10'><h1 className='inline mr-5 text-xs' >Log out</h1><IoIosLogOut style={iconStyleDrop} /></Link>
               </div>

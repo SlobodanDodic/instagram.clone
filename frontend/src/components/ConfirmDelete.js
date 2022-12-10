@@ -15,7 +15,7 @@ export default function ConfirmDelete() {
       .delete("auth/updateAccount/" + user)
       .then((res) => {
         toast.success('Account was successfully deleted!', { autoClose: 5000 });
-        setUser('');
+        setUser(null);
         setDeleteModal()
       })
       .catch((err) => {
