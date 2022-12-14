@@ -37,4 +37,5 @@ export class UsersService {
       data: { profileImage: profileImage, bio: bio },
     });
   }
+
 }

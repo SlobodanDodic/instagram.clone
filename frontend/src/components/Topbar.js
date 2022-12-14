@@ -40,7 +40,7 @@ export default function Topbar() {
             <Link to='/discover' className='flex flex-row items-center justify-center text-sm'><RiCompassDiscoverLine style={iconStyle} /></Link>
 
             <div onClick={setOpen} className="relative z-20 flex flex-row items-center justify-center pr-3 text-sm hover:cursor-pointer">
-              <img src={avatar} alt="avatar-profile" className='inline object-cover w-6 h-6 border rounded-full' />
+              <img src={loggedUser?.profileImage ? loggedUser?.profileImage : avatar} alt="avatar-profile" className='inline object-cover w-6 h-6 p-px rounded-full bg-gradient-to-b from-red-600 via-purple-600 to-pink-700' />
               <span className="pb-1 ml-1 text-gray-dark">⌵</span>
               <div className={open ? "absolute right-0 flex flex-col w-screen px-2 bg-white border-b border-l border-gray top-12 rounded-l-md" : 'hidden'}>
                 <Link to={"/profile/" + user} state={{ data: loggedUser }} className='flex flex-row items-center justify-end py-1 my-1 rounded hover:bg-gray/10'><h1 className='inline mr-5 text-xs capitalize' >@{user}</h1><MdEditNote style={iconStyleDrop} /></Link>

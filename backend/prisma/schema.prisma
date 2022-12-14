@@ -9,31 +9,35 @@ datasource db {
 }
 
 model User {
-  id             String   @unique @default(uuid())
-  username       String   @unique
-  email          String   @unique
+  id             String    @unique @default(uuid())
+  username       String    @unique
+  email          String    @unique
   hashedPassword String
-  token          String   @unique
-  isActivated    Boolean  @default(false)
+  token          String    @unique
+  isActivated    Boolean   @default(false)
   profileImage   String?
   bio            String?
   posts          Post[]
-  createdAt      DateTime @default(now())
-  updateAt       DateTime @updatedAt()
+  comments       Comment[]
+  createdAt      DateTime  @default(now())
+  updateAt       DateTime  @updatedAt()
 }
 
 model Post {
   id        String    @unique @default(uuid())
-  published Boolean   @default(false)
+  published DateTime  @default(now())
   caption   String
+  likes     Int       @default(0)
   postImage String
   comments  Comment[]
-  author    User?     @relation(fields: [authorId], references: [id])
-  authorId  String?
+  author    User      @relation(fields: [authorId], references: [id])
+  authorId  String
 }
 
 model Comment {
-  id     String  @unique @default(uuid())
-  post   Post?   @relation(fields: [postId], references: [id])
-  postId String?
+  id       String @unique @default(uuid())
+  post     Post   @relation(fields: [postId], references: [id])
+  postId   String
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId String
 }
