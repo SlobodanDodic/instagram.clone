@@ -9,7 +9,10 @@ module.exports = {
     extend: {
       fontFamily: {
         'sans': ['Inter var']
-      }
+      },
+      backgroundImage: {
+        notFound: "url('../src/assets/notFound.jpeg')",
+      },
     },
   },
   plugins: [

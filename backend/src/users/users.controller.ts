@@ -1,6 +1,5 @@
 import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
-import { PostDto } from '../post/dto/post.dto';
 import { UsersService } from './users.service';
 
 @Controller('users')
@@ -26,6 +25,11 @@ export class UsersController {
   @Patch(':username')
   updateProfile(@Param('username') username: string, @Body('profileImage') profileImage: string, @Body('bio') bio: string) {
     return this.usersService.updateProfile(username, profileImage, bio);
+  }
+
+  @Get('postsBy/:username')
+  findUserPosts(@Param('username') username: string) {
+    return this.usersService.findUserPosts(username);
   }
 
 }

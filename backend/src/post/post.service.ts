@@ -28,4 +28,7 @@ export class PostService {
     });
   }
 
+  async findOne(id: string) {
+    return await this.prisma.post.findUnique({ where: { id: id } });
+  }
 }
