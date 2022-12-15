@@ -38,4 +38,11 @@ export class UsersService {
     });
   }
 
+  async findUserPosts(username: string) {
+    return await this.prisma.user.findUnique({
+      where: { username: username },
+      include: { posts: true },
+    })
+  }
+
 }

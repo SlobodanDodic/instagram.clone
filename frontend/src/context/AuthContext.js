@@ -17,6 +17,12 @@ export const AuthProvider = ({ children }) => {
   const [postModal, setPostModal] = useToggle(false)
   const [searchModal, setSearchModal] = useToggle(false)
   const [deleteModal, setDeleteModal] = useToggle(false)
+  const [singlePostModal, setSinglePostModal] = useToggle(false);
+
+  const [postCountToggle, setPostCountToggle] = useToggle(true);
+  const [followingToggle, setFollowingToggle] = useToggle(false);
+  const [followersToggle, setFollowersToggle] = useToggle(false);
+
 
   useEffect(() => {
     localStorage.setItem('logged-user', JSON.stringify(user));
@@ -49,7 +55,15 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, setUser, postModal, setPostModal, searchModal, setSearchModal, deleteModal, setDeleteModal, isLoading, setIsLoading, loggedUser, setLoggedUser, token, setToken, instance }}>
+      value={{
+        instance,
+        user, setUser,
+        token, setToken,
+        isLoading, setIsLoading,
+        loggedUser, setLoggedUser,
+        postCountToggle, setPostCountToggle, followingToggle, setFollowingToggle, followersToggle, setFollowersToggle,
+        postModal, setPostModal, searchModal, setSearchModal, deleteModal, setDeleteModal, singlePostModal, setSinglePostModal,
+      }}>
       {children}
     </AuthContext.Provider>
   );

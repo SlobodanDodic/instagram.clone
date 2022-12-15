@@ -1,26 +1,51 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import AuthContext from "../../context/AuthContext";
 import { useParams, useLocation } from "react-router-dom";
 import useToggle from "../../hooks/useToggle";
 import EditProfile from "../../components/EditProfile";
+import SinglePost from "../../components/SinglePost";
 import avatar from '../../assets/avatar.jpeg';
+import ProfileStats from "../../components/ProfileStats";
+import Spinner from "../../components/Spinner";
+import { toast } from "react-toastify";
 
 export default function ProfilePage() {
-  const { user } = useContext(AuthContext);
-  const [posts] = useState({});
+  const { user, postCountToggle, followingToggle, followersToggle, isLoading, setIsLoading, instance } = useContext(AuthContext);
   const [following] = useState(false);
-  // const [posts, setPosts] = useState({});
-  // const [following, setFollowing] = useState(false);
+  const [postsByUser, setPostsByUser] = useState({});
   const { username } = useParams();
   const location = useLocation();
   const selectedUser = location.state?.data;
 
   const [showModal, setShowModal] = useToggle(false)
-  const [postCountToggle, setPostCountToggle] = useToggle(true);
-  const [followingToggle, setFollowingToggle] = useToggle(false);
-  const [followersToggle, setFollowersToggle] = useToggle(false);
 
   const followClick = () => { console.log("Follow"); }
+
+  useEffect(() => {
+    instance
+      .get("users/postsBy/" + username)
+      .then((res) => {
+        setPostsByUser(res?.data?.posts);
+      })
+      .catch((err) => {
+        if (err) {
+          toast.error('Response - ' + err)
+          console.log('Response - ' + err);
+        } else if (err.request) {
+          toast.error('Request - ' + err.request)
+          console.log('Request - ' + err.request);
+        } else {
+          toast.error('Error - ' + err.errorMessage)
+          console.log('Error - ' + err);
+        }
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+    // eslint-disable-next-line
+  }, [username])
+
+  if (isLoading) return <Spinner />;
 
   return (
     <div className="flex flex-col w-screen max-w-screen-xl p-2 mx-auto text-sm text-gray-600 md:flex-row">
@@ -41,19 +66,7 @@ export default function ProfilePage() {
             <img className="profile" src={selectedUser?.profileImage ? selectedUser?.profileImage : avatar} alt={selectedUser?.username} />
           </div>
 
-          <div className="flex flex-col text-gray-700">
-            <button className='text-right hover:cursor-pointer' onClick={() => { setPostCountToggle(false); setFollowingToggle(false); setFollowersToggle(true) }}>
-              ㋡ Followers: <strong>{selectedUser?.followers ? selectedUser?.followers.length : 0}</strong>
-            </button>
-
-            <button className='py-4 text-right hover:cursor-pointer' onClick={() => { setPostCountToggle(true); setFollowingToggle(false); setFollowersToggle(false) }}>
-              🔍 Posts: <strong>{posts?.length ? posts?.length : 0}</strong>
-            </button>
-
-            <button className='text-right hover:cursor-pointer' onClick={() => { setPostCountToggle(false); setFollowingToggle(true); setFollowersToggle(false) }}>
-              ㋡ Following: <strong>{selectedUser?.following ? selectedUser?.following : 0}</strong>
-            </button>
-          </div>
+          <ProfileStats selectedUser={selectedUser} postsByUser={postsByUser} />
         </div>
 
         {user !== username && <div className="flex "><button onClick={followClick} className={following ? "btn-follow" : "btn-unfollow"}>{following ? "Unfollow" : "Follow"}</button></div>}
@@ -66,12 +79,16 @@ export default function ProfilePage() {
       </div>
 
       <div className="flex flex-col items-center w-full p-3 md:w-2/3">
-        <h1 className="text-lg font-medium">@{selectedUser?.username}'s_stat:</h1>
-        {postCountToggle && <div className="w-full"><p className="w-full p-3 text-sm text-center">Posts:</p></div>}
+        <h1 className="text-lg font-medium">@{selectedUser?.username}'s_work:</h1>
 
-        {followingToggle && <div className="w-full"><p className="w-full p-3 text-sm text-center">Following:</p></div>}
+        {postCountToggle && <div className="w-full">
+          <p className="stat-text">Posts</p>
+          <SinglePost postsByUser={postsByUser} />
+        </div>}
 
-        {followersToggle && <div className="w-full"><p className="w-full p-3 text-sm text-center">Followers:</p></div>}
+        {followingToggle && <div className="w-full"><p className="stat-text">Following:</p></div>}
+
+        {followersToggle && <div className="w-full"><p className="stat-text">Followers:</p></div>}
 
       </div>
     </div>
