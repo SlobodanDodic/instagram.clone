@@ -1,11 +1,7 @@
-import { User } from '@prisma/client';
-import { IsNotEmpty, IsString, IsOptional, IsArray, IsNumber } from 'class-validator';
+import { Like, Post, User } from '@prisma/client';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class PostDto {
-  // @IsString()
-  // @IsNotEmpty()
-  // public authorId: User['id'];
-
   @IsString()
   @IsNotEmpty()
   public author: User['username'];
@@ -18,11 +14,32 @@ export class PostDto {
   @IsNotEmpty()
   public postImage: string;
 
-  @IsArray()
+  @IsString()
+  @IsNotEmpty()
   @IsOptional()
-  public comments: string[];
+  public likes: Like['id'];
+}
 
-  @IsNumber()
-  @IsOptional()
-  public likes: number;
+export class CommentDto {
+  @IsString()
+  @IsNotEmpty()
+  public post: Post['id'];
+
+  @IsString()
+  @IsNotEmpty()
+  public commentAuthor: User['id'];
+
+  @IsString()
+  @IsNotEmpty()
+  public body: string;
+}
+
+export class LikeDto {
+  @IsString()
+  @IsNotEmpty()
+  public postId: Post['id'];
+
+  @IsString()
+  @IsNotEmpty()
+  public userId: User['id'];
 }
