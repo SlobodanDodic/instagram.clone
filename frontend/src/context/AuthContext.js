@@ -17,7 +17,6 @@ export const AuthProvider = ({ children }) => {
   const [postModal, setPostModal] = useToggle(false)
   const [searchModal, setSearchModal] = useToggle(false)
   const [deleteModal, setDeleteModal] = useToggle(false)
-  const [singlePostModal, setSinglePostModal] = useToggle(false);
 
   const [postCountToggle, setPostCountToggle] = useToggle(true);
   const [followingToggle, setFollowingToggle] = useToggle(false);
@@ -62,7 +61,7 @@ export const AuthProvider = ({ children }) => {
         isLoading, setIsLoading,
         loggedUser, setLoggedUser,
         postCountToggle, setPostCountToggle, followingToggle, setFollowingToggle, followersToggle, setFollowersToggle,
-        postModal, setPostModal, searchModal, setSearchModal, deleteModal, setDeleteModal, singlePostModal, setSinglePostModal,
+        postModal, setPostModal, searchModal, setSearchModal, deleteModal, setDeleteModal,
       }}>
       {children}
     </AuthContext.Provider>

@@ -19,7 +19,6 @@ import AccountPage from './pages/logged-in/AccountPage'
 import DiscoverPage from './pages/logged-in/DiscoverPage'
 import HomePage from './pages/logged-in/HomePage'
 import ProfilePage from './pages/logged-in/ProfilePage'
-import PostModal from "./components/PostModal";
 import NotFound from "./pages/logged-in/NotFound";
 
 export default function App() {
@@ -47,7 +46,6 @@ export default function App() {
             <Route path="/discover" element={<DiscoverPage />} />
             <Route path='/' exact element={<HomePage />} />
             <Route path='/profile/:username' element={<ProfilePage />} />
-            <Route path='/profile/:username/:id' element={<PostModal />} />
 
           </Route>
           <Route path="*" element={<NotFound />} />

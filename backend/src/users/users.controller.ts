@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
 import { UsersService } from './users.service';
 
@@ -30,6 +30,11 @@ export class UsersController {
   @Get('postsBy/:username')
   findUserPosts(@Param('username') username: string) {
     return this.usersService.findUserPosts(username);
+  }
+
+  @Get(':username/posts')
+  findUserWithPosts(@Param('username') username: string) {
+    return this.usersService.findUserWithPosts(username);
   }
 
 }

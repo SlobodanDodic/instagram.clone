@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import AuthContext from "../context/AuthContext";
 
-export default function ProfileStats({ selectedUser, postsByUser }) {
+export default function ProfileStats({ selectedUser, usersPosts }) {
   const { setPostCountToggle, setFollowingToggle, setFollowersToggle } = useContext(AuthContext);
 
   return (
@@ -12,7 +12,7 @@ export default function ProfileStats({ selectedUser, postsByUser }) {
         </button>
 
         <button className='py-4 text-right hover:cursor-pointer' onClick={() => { setPostCountToggle(true); setFollowingToggle(false); setFollowersToggle(false) }}>
-          Posts: <strong>{postsByUser?.length ? postsByUser?.length : 0}</strong>
+          Posts: <strong>{usersPosts?.length ? usersPosts?.length : 0}</strong>
         </button>
 
         <button className='text-right hover:cursor-pointer' onClick={() => { setPostCountToggle(false); setFollowingToggle(true); setFollowersToggle(false) }}>

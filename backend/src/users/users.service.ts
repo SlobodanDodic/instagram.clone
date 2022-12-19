@@ -7,7 +7,9 @@ export class UsersService {
   constructor(private prisma: PrismaService) { }
 
   async findAll() {
-    const users = await this.prisma.user.findMany({ select: { username: true, email: true } });
+    const users = await this.prisma.user.findMany({
+      select: { id: true, username: true, email: true, posts: true }
+    });
     return { users };
   }
 
@@ -28,7 +30,11 @@ export class UsersService {
   }
 
   async findUsers(username: string) {
-    return await this.prisma.user.findMany({ where: { username: { contains: username } } });
+    return await this.prisma.user.findMany({
+      where: {
+        username: { contains: username }
+      }
+    });
   }
 
   async updateProfile(username: string, profileImage: string, bio: string) {
@@ -41,7 +47,14 @@ export class UsersService {
   async findUserPosts(username: string) {
     return await this.prisma.user.findUnique({
       where: { username: username },
-      include: { posts: true },
+      include: { posts: { include: { likes: true, comments: true } } },
+    })
+  }
+
+  async findUserWithPosts(username: string) {
+    return await this.prisma.user.findUnique({
+      where: { username: username },
+      select: { id: true, username: true, email: true, profileImage: true, posts: { include: { likes: true, comments: true } } }
     })
   }
 
