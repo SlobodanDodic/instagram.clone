@@ -17,21 +17,8 @@ export default function Search() {
     setIsLoading(true);
     instance
       .get("users/" + searchText)
-      .then((res) => {
-        setSearchResults(res.data);
-      })
-      .catch((err) => {
-        if (err) {
-          toast.error('Response - ' + err)
-          console.log('Response - ' + err);
-        } else if (err.request) {
-          toast.error('Request - ' + err.request)
-          console.log('Request - ' + err.request);
-        } else {
-          toast.error('Error - ' + err.errorMessage)
-          console.log('Error - ' + err);
-        }
-      })
+      .then((res) => { setSearchResults(res.data) })
+      .catch((err) => { console.log('Response - ' + err); })
       .finally(() => setIsLoading(false));
   };
 

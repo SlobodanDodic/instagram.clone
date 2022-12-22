@@ -1,35 +1,31 @@
 import { useContext, useEffect, useState } from 'react';
 import AuthContext from '../context/AuthContext';
-import Spinner from './Spinner';
-import { toast } from "react-toastify";
-import Comment from './Comment';
+import { Link } from "react-router-dom";
+import avatar from '../assets/avatar.jpeg'
+import dayjs from "dayjs";
+
+var relativeTime = require('dayjs/plugin/relativeTime')
+dayjs.extend(relativeTime)
 
 export default function Comments({ id }) {
-  const { isLoading, setIsLoading, instance, loggedUser } = useContext(AuthContext);
+  const { instance, loggedUser } = useContext(AuthContext);
   const [comment, setComment] = useState('')
-  const [allComments, setallComments] = useState([])
+  const [allComments, setAllComments] = useState([])
   const user = loggedUser.id
 
   const sendComment = () => {
-    setIsLoading(true);
     instance
-      .post(`post/createComment`, { body: comment, post: id, commentAuthor: user })
-      .then((res) => {
-        toast.success('Done!');
-        setComment('');
-      })
-      .catch((err) => { console.log('Error - ' + err) })
-      .finally(() => setIsLoading(false));
+      .post(`post/comment`, { body: comment, post: id, commentAuthor: user })
+      .then((res) => setComment(''))
+      .catch((err) => console.log('Error - ' + err))
   };
 
   useEffect(() => {
     instance
-      .get(`post/getComments/${id}`)
-      .then((res) => { setallComments(res.data) })
-      .catch((err) => { console.error(err) })
-  }, [id, instance])
-
-  if (isLoading) return <Spinner />;
+      .get(`post/comments/${id}`)
+      .then((res) => setAllComments(res.data))
+      .catch((err) => console.error('Error - ' + err))
+  }, [id, instance, comment])
 
   return (
     <div className="flex flex-col w-full sm:flex-row">
@@ -47,7 +43,16 @@ export default function Comments({ id }) {
 
       <div className="flex flex-col w-full p-2 overflow-scroll text-gray-600 normal-case sm:w-2/3">
         {allComments.map((single) => (
-          <Comment key={single?.id} single={single} />
+          <div key={single.id} className="flex mb-4 ml-1">
+            <Link to={`/profile/${single?.commentAuthor?.username}`} className="flex flex-col justify-center w-16">
+              <img src={single?.commentAuthor?.profileImage ? single?.commentAuthor?.profileImage : avatar} alt='profile' className='inline object-cover p-px rounded-full w-11 h-11 bg-gradient-to-b from-red-600 via-purple-600 to-pink-700' />
+            </Link>
+            <div className="flex flex-col justify-center w-full text-xs">
+              <div className="font-semibold text-gray-700">@{single?.commentAuthor?.username}</div>
+              <p className="pb-1 text-gray-800">{single?.body}</p>
+              <p className="font-semibold text-gray-400">{dayjs(single?.created_at).format('MMM. DD, YYYY / HH:mm')}</p>
+            </div>
+          </div>
         ))}
       </div>
 

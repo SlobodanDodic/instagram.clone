@@ -1,14 +1,28 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import AuthContext from "../context/AuthContext";
 import useToggle from "../hooks/useToggle";
+import { useParams } from "react-router-dom";
 import PostDetail from "./PostDetail";
+
 import dayjs from "dayjs";
 
 var relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(relativeTime)
 
-export default function Posts({ usersPosts }) {
+export default function Posts() {
+  const { instance } = useContext(AuthContext);
+  const [usersPosts, setUsersPosts] = useState([])
   const [singlePost, setSinglePost] = useState(null)
   const [showPostDetail, setShowPostDetail] = useToggle(false)
+  const { username } = useParams();
+
+  useEffect(() => {
+    instance
+      .get(`users/userPosts/${username}`)
+      .then((res) => { setUsersPosts(res.data.posts) })
+      .catch((err) => { console.log('Error - ' + err) })
+    // eslint-disable-next-line
+  }, [username])
 
   return (
     <div className='flex flex-col items-center justify-center'>

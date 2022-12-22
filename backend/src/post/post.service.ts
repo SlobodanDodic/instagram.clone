@@ -6,13 +6,8 @@ import { CommentDto, LikeDto, PostDto } from './dto/post.dto';
 export class PostService {
   constructor(private prisma: PrismaService) { }
 
-  async findAll() {
-    return await this.prisma.post.findMany({});
-  }
-
   async createPost(dto: PostDto) {
     const { author, caption, postImage } = dto;
-
     return await this.prisma.post.create({
       data: {
         caption,
@@ -31,9 +26,15 @@ export class PostService {
     })
   }
 
+  async removePost(id: string) {
+    return await this.prisma.post.delete({
+      where: { id: id },
+    })
+
+  }
+
   async toggleLike(dto: LikeDto) {
     const { postId, userId } = dto;
-
     return await this.prisma.like.create({
       data: {
         userId: userId,
@@ -54,13 +55,8 @@ export class PostService {
     })
   }
 
-  async likes(id: string) {
-    return await this.prisma.like.findMany({ where: { postId: id } });
-  }
-
   async createComment(dto: CommentDto) {
     const { post, body, commentAuthor } = dto;
-
     return await this.prisma.comment.create({
       data: {
         body: body,
@@ -76,7 +72,6 @@ export class PostService {
   }
 
   async getComments(id: string) {
-
     return await this.prisma.comment.findMany({
       where: {
         post: { id },
