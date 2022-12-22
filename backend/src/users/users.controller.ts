@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
 import { UsersService } from './users.service';
 
@@ -6,35 +6,52 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
-  }
-
+  // Gey logged user's profile:
   @UseGuards(JwtAuthGuard)
   @Get('me/:username')
   getMyUser(@Param() params: { username: string }, @Req() req) {
     return this.usersService.getMyUser(params.username, req);
   }
 
+  // Get users by search:
   @Get(':username')
   findUsers(@Param('username') username: string) {
     return this.usersService.findUsers(username);
   }
 
+  // Update logged user's profile:
   @Patch(':username')
   updateProfile(@Param('username') username: string, @Body('profileImage') profileImage: string, @Body('bio') bio: string) {
     return this.usersService.updateProfile(username, profileImage, bio);
   }
 
-  @Get('postsBy/:username')
-  findUserPosts(@Param('username') username: string) {
-    return this.usersService.findUserPosts(username);
-  }
-
-  @Get(':username/posts')
+  // Get user's profile:
+  @Get('profile/:username')
   findUserWithPosts(@Param('username') username: string) {
     return this.usersService.findUserWithPosts(username);
   }
 
+  // Follow user:
+  @Post('follow/:username')
+  follow(@Param('username') username: string, @Body('followerId') followerId: string, @Body('followingId') followingId: string) {
+    return this.usersService.follow(username, followingId, followerId);
+  }
+
+  // Unfollow user:
+  @Delete('follow/:username')
+  followRemove(@Param('username') username: string, @Body('followerId') followerId: string, @Body('followingId') followingId: string) {
+    return this.usersService.followRemove(username, followingId, followerId);
+  }
+
+  // Get all users that logged user follows and who is following him:
+  @Get(':username/follows')
+  findUserWithFollows(@Param('username') username: string) {
+    return this.usersService.findUserWithFollows(username);
+  }
+
+  // Get all user's posts with likes and comments:
+  @Get("userPosts/:username")
+  userPosts(@Param('username') username: string) {
+    return this.usersService.userPosts(username);
+  }
 }

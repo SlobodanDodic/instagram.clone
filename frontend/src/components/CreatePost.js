@@ -14,12 +14,8 @@ export default function CreatePost() {
     return new Promise((resolve, reject) => {
       const fileReader = new FileReader();
       fileReader.readAsDataURL(file);
-      fileReader.onload = () => {
-        resolve(fileReader.result);
-      };
-      fileReader.onerror = (error) => {
-        reject(error);
-      };
+      fileReader.onload = () => { resolve(fileReader.result) };
+      fileReader.onerror = (error) => { reject(error) };
     });
   };
   const handleFileUpload = async (e) => {
@@ -28,24 +24,14 @@ export default function CreatePost() {
     setPhoto({ ...photo, myFile: base64 });
   };
 
-  const updateProfile = () => {
+  const createPost = () => {
     setIsLoading(true);
     instance
       .post(`post/create`, { caption: caption, postImage: photo?.myFile, author: loggedUser?.username })
-      .then((res) => {
-        toast.success('Successfully edited!');
-      })
+      .then((res) => { toast.success('Successfully uploaded!') })
       .catch((err) => {
-        if (err) {
-          toast.error('Response - ' + err)
-          console.log('Response - ' + err);
-        } else if (err.request) {
-          toast.error('Request - ' + err.request)
-          console.log('Request - ' + err.request);
-        } else {
-          toast.error('Error - ' + err.errorMessage)
-          console.log('Error - ' + err);
-        }
+        toast.error('Response - ' + err)
+        console.log('Response - ' + err);
       })
       .finally(() => {
         setIsLoading(false);
@@ -71,7 +57,7 @@ export default function CreatePost() {
               <>
                 <img src={photo?.myFile ? photo?.myFile : null} alt="media" className='rounded h-2/3' />
                 <input onChange={(e) => setCaption(e.target.value)} value={caption} type="text" placeholder="Enter a Caption" className='p-1 mt-2 mb-4 text-xs text-center border rounded-sm' />
-                <button onClick={updateProfile} className="px-4 py-2 text-xs text-white bg-blue-500 rounded hover:bg-blue/90">Add new post</button>
+                <button onClick={createPost} className="px-4 py-2 text-xs text-white bg-blue-500 rounded hover:bg-blue/90">Add new post</button>
               </>
               :
               <>

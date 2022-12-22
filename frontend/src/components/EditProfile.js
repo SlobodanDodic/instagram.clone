@@ -21,12 +21,8 @@ export default function EditProfile({ setShowModal, selectedUser }) {
     return new Promise((resolve, reject) => {
       const fileReader = new FileReader();
       fileReader.readAsDataURL(file);
-      fileReader.onload = () => {
-        resolve(fileReader.result);
-      };
-      fileReader.onerror = (error) => {
-        reject(error);
-      };
+      fileReader.onload = () => { resolve(fileReader.result) };
+      fileReader.onerror = (error) => { reject(error) };
     });
   };
   const handleFileUpload = async (e) => {
@@ -39,20 +35,10 @@ export default function EditProfile({ setShowModal, selectedUser }) {
     setIsLoading(true);
     instance
       .patch(`users/${username}`, { bio: bio, profileImage: profileImage?.myFile })
-      .then((res) => {
-        toast.success('Successfully edited!');
-      })
+      .then((res) => { toast.success('Successfully edited!') })
       .catch((err) => {
-        if (err) {
-          toast.error('Response - ' + err)
-          console.log('Response - ' + err);
-        } else if (err.request) {
-          toast.error('Request - ' + err.request)
-          console.log('Request - ' + err.request);
-        } else {
-          toast.error('Error - ' + err.errorMessage)
-          console.log('Error - ' + err);
-        }
+        toast.error('Response - ' + err)
+        console.log('Response - ' + err);
       })
       .finally(() => setIsLoading(false));
   };

@@ -20,6 +20,8 @@ model User {
   posts          Post[]
   comments       Comment[]
   likes          Like[]
+  followers      Follows[] @relation("following")
+  following      Follows[] @relation("follower")
   createdAt      DateTime  @default(now())
   updateAt       DateTime  @updatedAt()
 }
@@ -31,7 +33,7 @@ model Post {
   likes     Like[]
   postImage String
   comments  Comment[]
-  author    User      @relation(fields: [authorId], references: [id])
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId  String
 }
 
@@ -39,17 +41,26 @@ model Comment {
   id              String   @unique @default(uuid())
   created_at      DateTime @default(now())
   body            String
-  post            Post     @relation(fields: [postId], references: [id])
+  post            Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId          String
-  commentAuthor   User     @relation(fields: [commentAuthorId], references: [id])
+  commentAuthor   User     @relation(fields: [commentAuthorId], references: [id], onDelete: Cascade)
   commentAuthorId String
 }
 
 model Like {
   id         String   @unique @default(uuid())
   created_at DateTime @default(now())
-  post       Post     @relation(fields: [postId], references: [id])
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId     String
-  user       User     @relation(fields: [userId], references: [id])
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String
+}
+
+model Follows {
+  follower    User   @relation("follower", fields: [followerId], references: [id])
+  followerId  String
+  following   User   @relation("following", fields: [followingId], references: [id])
+  followingId String
+
+  @@id([followerId, followingId])
 }
