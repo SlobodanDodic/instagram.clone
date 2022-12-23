@@ -41,13 +41,14 @@ export class UsersService {
   }
 
   // Get user's profile:
-  async findUserWithPosts(username: string) {
+  async findUserProfile(username: string) {
     return await this.prisma.user.findUnique({
       where: { username: username },
       select: {
         id: true,
-        username: true,
+        bio: true,
         email: true,
+        username: true,
         profileImage: true,
         posts: {
           include: { likes: true, comments: true }
@@ -111,4 +112,22 @@ export class UsersService {
     })
   }
 
+  // Get all following users of following users:
+  async discovery(id: string) {
+    const usersArray = await this.usersArray(id);
+    const ids = usersArray?.following.map((id) => id.followingId);
+
+    return await this.prisma.user.findMany({
+      where: { id: { in: ids } },
+      select: { following: { select: { followingId: true } } },
+    });
+  }
+
+  // helper functions:
+  async usersArray(id: string) {
+    return await this.prisma.user.findUnique({
+      where: { id: id },
+      select: { following: { select: { followingId: true } } },
+    })
+  }
 }

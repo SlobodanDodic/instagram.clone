@@ -50,19 +50,18 @@ export default function PostDetail({ post, setShowPostDetail }) {
         <div className="flex flex-col w-full h-full max-w-screen-lg p-3 text-sm bg-white rounded-lg">
           <IoMdClose className='absolute z-50 m-1 text-lg top-16 right-8 hover:cursor-pointer' onClick={setShowPostDetail} />
           <div className="flex flex-col items-center justify-center w-full px-2 pt-6 border-b border-gray-200 rounded-r-lg md:py-4 h-2/3 md:flex-row">
-            <img src={post.postImage} alt={post.authorId} className="object-contain object-center w-full h-full pb-2 rounded-lg md:w-3/4" />
+            <img src={post.postImage} alt={post.id} className="object-contain object-center w-full h-full pb-2 rounded-lg md:w-3/4" />
             <div className="flex flex-col justify-between w-full p-2 font-semibold text-gray-600 border-gray-200 md:ml-4 md:h-full md:border-l md:w-1/4">
               <div className="flex flex-col justify-between h-full">
                 {!postByLoggedUser ? (
                   <button onClick={toggleLike} className="flex justify-center text-xl text-red-500 pb-7 h-1/3 md:flex-col">{!userLikedPost ? '♡ Like me!' : "♥ Liked!"}</button>
                 ) : (<button onClick={removePost} className="flex justify-center text-lg text-red-500 drop-shadow-lg pb-7 h-1/3 md:flex-col">✗ Delete post</button>)}
-                <div className="flex justify-around md:flex-col h-1/3">
-                  <div className="pb-1">⏱ {dayjs(post.published).format('MMM. DD, YYYY')}</div>
-                  <div className="pb-1 capitalize">© {post.caption}</div>
-                </div>
-                <div className="flex justify-around md:flex-col h-1/3">
-                  <div className="pb-1">❤️ {singlePost?.likes ? singlePost?.likes?.length : 0} likes</div>
-                  <div className="pb-1">💬 {singlePost?.comments ? singlePost?.comments?.length : 0} comments</div>
+                <div className="flex justify-around md:flex-col h-2/3">
+                  <div className="pb-1 uppercase">⦿ {post.author.username}'s post</div>
+                  <div className="pb-1 text-gray-500">⏱ {dayjs(post.published).format('MMM. DD, YYYY')}</div>
+                  <div className="pb-1 text-gray-500 capitalize">© {post.caption}</div>
+                  <div className="pb-1 text-gray-500">❤️ {singlePost?.likes ? singlePost?.likes?.length : 0} likes</div>
+                  <div className="pb-1 text-gray-500">💬 {singlePost?.comments ? singlePost?.comments?.length : 0} comments</div>
                 </div>
               </div>
             </div>

@@ -56,7 +56,7 @@ export default function ProfileStats({ userProfile, loggedUser, usersPosts, user
         </div>
       </div>
 
-      {user !== username && <div className="flex flex-row"><button onClick={toggleFollow} className={isFollowing ? "btn-follow" : "btn-unfollow"}>{isFollowing ? "Unfollow" : "Follow"}</button></div>}
+      {user !== username && <div className="flex flex-row mb-4"><button onClick={toggleFollow} className={isFollowing ? "btn-follow" : "btn-unfollow"}>{isFollowing ? "Unfollow" : "Follow"}</button></div>}
     </div>
   )
 }
