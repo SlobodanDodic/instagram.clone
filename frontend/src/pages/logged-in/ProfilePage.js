@@ -15,8 +15,6 @@ export default function ProfilePage() {
   const { username } = useParams();
   const usersPosts = userProfile?.posts;
 
-  // console.log(userProfile);
-
   useEffect(() => {
     setIsLoading(true);
     instance
@@ -48,7 +46,7 @@ export default function ProfilePage() {
 
         <ProfileStats userProfile={userProfile} usersPosts={usersPosts} username={username} loggedUser={loggedUser} />
 
-        <div className="py-5 border-b border-gray-200">
+        <div className="pb-3 border-b border-gray-200">
           <p className='pb-3 italic font-medium text-center text-gray-700'>About me:</p>
           <p className='text-center'>{userProfile?.bio}</p>
         </div>

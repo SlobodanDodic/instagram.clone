@@ -6,16 +6,16 @@ import AuthContext from '../context/AuthContext';
 import Spinner from './Spinner';
 import { toast } from "react-toastify";
 
-export default function EditProfile({ setShowModal, selectedUser }) {
+export default function EditProfile({ setShowModal, userProfile }) {
   const { isLoading, setIsLoading, instance } = useContext(AuthContext);
   const { username } = useParams();
   const [bio, setBio] = useState('');
   const [profileImage, setProfileImage] = useState({ myFile: "" });
 
   useEffect(() => {
-    setBio(selectedUser?.bio);
-    setProfileImage(selectedUser?.profileImage);
-  }, [selectedUser]);
+    setBio(userProfile?.bio);
+    setProfileImage(userProfile?.profileImage);
+  }, [userProfile]);
 
   const convertToBase64 = (file) => {
     return new Promise((resolve, reject) => {
@@ -43,13 +43,13 @@ export default function EditProfile({ setShowModal, selectedUser }) {
       .finally(() => setIsLoading(false));
   };
 
-  if (isLoading) return <Spinner />;
-
   const submit = () => {
     updateProfile();
     setShowModal()
     window.location.reload();
   }
+
+  if (isLoading) return <Spinner />;
 
   return (
     <div className='absolute top-0 left-0 z-50'>
@@ -60,10 +60,10 @@ export default function EditProfile({ setShowModal, selectedUser }) {
 
           <div className="flex flex-col items-center justify-center pb-3 text-xs">
             <div className="flex flex-col items-center my-4">
-              {selectedUser?.profileImage ? (
-                <img src={selectedUser?.profileImage} alt={selectedUser?.username} className="profile" />
+              {userProfile?.profileImage ? (
+                <img src={userProfile?.profileImage} alt={userProfile?.username} className="profile" />
               ) : (
-                <img src={profileImage === '' ? selectedUser?.profileImage : avatar} alt={selectedUser?.username} className="profile" />
+                <img src={profileImage === '' ? userProfile?.profileImage : avatar} alt={userProfile?.username} className="profile" />
               )}
             </div>
 
@@ -73,7 +73,7 @@ export default function EditProfile({ setShowModal, selectedUser }) {
 
             <div className="w-full px-3 my-5">
               <label className='block mb-3 font-medium text-center text-gray-600' htmlFor="bio">About me:</label>
-              <textarea rows="3" type="text" placeholder={selectedUser?.bio} defaultValue={bio} onChange={(e) => setBio(e.target.value)} className='block w-full px-2 py-1 mx-auto text-xs rounded-lg shadow-inner bg-gray-50/50 md:w-1/2' />
+              <textarea rows="3" type="text" placeholder={userProfile?.bio} defaultValue={bio} onChange={(e) => setBio(e.target.value)} className='block w-full px-2 py-1 mx-auto text-xs rounded-lg shadow-inner bg-gray-50/50 md:w-1/2' />
             </div>
 
             <div> <button className='mt-4 btn-add bg-blue' onClick={submit}> Submit </button>  </div>

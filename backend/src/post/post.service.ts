@@ -12,9 +12,7 @@ export class PostService {
       data: {
         caption,
         postImage,
-        author: {
-          connect: { username: author },
-        },
+        author: { connect: { username: author } },
       },
     });
   }
@@ -33,25 +31,17 @@ export class PostService {
 
   }
 
-  async toggleLike(dto: LikeDto) {
+  async addLike(dto: LikeDto) {
     const { postId, userId } = dto;
     return await this.prisma.like.create({
-      data: {
-        userId: userId,
-        postId: postId
-      },
-      include: {
-        post: true,
-        user: true
-      },
+      data: { userId: userId, postId: postId },
+      include: { post: true, user: true },
     });
   }
 
   async removeLike(id: string) {
     return await this.prisma.like.delete({
-      where: {
-        id: id,
-      },
+      where: { id: id },
     })
   }
 
@@ -60,12 +50,8 @@ export class PostService {
     return await this.prisma.comment.create({
       data: {
         body: body,
-        post: {
-          connect: { id: post },
-        },
-        commentAuthor: {
-          connect: { id: commentAuthor },
-        },
+        post: { connect: { id: post } },
+        commentAuthor: { connect: { id: commentAuthor } },
       },
       include: { post: true, commentAuthor: true },
     });
@@ -73,10 +59,30 @@ export class PostService {
 
   async getComments(id: string) {
     return await this.prisma.comment.findMany({
-      where: {
-        post: { id },
-      },
+      where: { post: { id } },
       include: { commentAuthor: true },
     });
+  }
+
+  // Get all posts of following users:
+  async getPostsOfFollowing(id: string) {
+    const usersArray = await this.usersArray(id);
+    const ids = usersArray?.following.map((id) => id.followingId);
+
+    return await this.prisma.post.findMany({
+      where: { authorId: { in: ids } },
+      include: { likes: true, author: true, comments: true },
+      orderBy: { published: "desc" }
+      // select: { posts: true },
+      // select: { posts: { orderBy: { published: "desc" } } },
+    });
+  }
+
+  // helper functions:
+  async usersArray(id: string) {
+    return await this.prisma.user.findUnique({
+      where: { id: id },
+      select: { following: { select: { followingId: true } } },
+    })
   }
 }

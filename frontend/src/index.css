@@ -40,7 +40,7 @@ body {
     @apply w-4 h-4 text-gray-400;
   }
   .profile {
-    @apply inline object-cover p-1 m-3 rounded-full w-36 h-36 bg-gradient-to-b from-red-600 via-purple-600 to-pink-700;
+    @apply inline object-cover p-1 m-2 rounded-full w-36 h-36 bg-gradient-to-b from-red-600 via-purple-600 to-pink-700;
   }
   .stat-text {
     @apply w-full p-5 text-xs italic font-semibold tracking-widest text-center underline underline-offset-2 decoration-blue-500;

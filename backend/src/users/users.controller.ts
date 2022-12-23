@@ -27,8 +27,8 @@ export class UsersController {
 
   // Get user's profile:
   @Get('profile/:username')
-  findUserWithPosts(@Param('username') username: string) {
-    return this.usersService.findUserWithPosts(username);
+  findUserProfile(@Param('username') username: string) {
+    return this.usersService.findUserProfile(username);
   }
 
   // Follow user:
@@ -53,5 +53,11 @@ export class UsersController {
   @Get("userPosts/:username")
   userPosts(@Param('username') username: string) {
     return this.usersService.userPosts(username);
+  }
+
+  // Get all following users of following users:
+  @Get('discovery/:id')
+  discovery(@Param('id') id: string) {
+    return this.usersService.discovery(id);
   }
 }

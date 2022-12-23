@@ -22,8 +22,8 @@ export class PostController {
   }
 
   @Post('like')
-  toggleLike(@Body() dto: LikeDto) {
-    return this.postService.toggleLike(dto);
+  addLike(@Body() dto: LikeDto) {
+    return this.postService.addLike(dto);
   }
 
   @Delete('like/:id')
@@ -40,4 +40,11 @@ export class PostController {
   getComments(@Param('id') id: string) {
     return this.postService.getComments(id);
   }
+
+  // Get all posts of following users:
+  @Get('getPostsOfFollowing/:id')
+  getPostsOfFollowing(@Param('id') id: string) {
+    return this.postService.getPostsOfFollowing(id);
+  }
+
 }
