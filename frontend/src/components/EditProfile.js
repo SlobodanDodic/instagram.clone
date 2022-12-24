@@ -35,11 +35,8 @@ export default function EditProfile({ setShowModal, userProfile }) {
     setIsLoading(true);
     instance
       .patch(`users/${username}`, { bio: bio, profileImage: profileImage?.myFile })
-      .then((res) => { toast.success('Successfully edited!') })
-      .catch((err) => {
-        toast.error('Response - ' + err)
-        console.log('Response - ' + err);
-      })
+      .then((res) => toast.success('Successfully edited!'))
+      .catch((err) => console.log('Response - ' + err))
       .finally(() => setIsLoading(false));
   };
 

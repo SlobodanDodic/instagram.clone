@@ -65,6 +65,15 @@ export class PostService {
   }
 
   // Get all posts of following users:
+  async userPosts(username: string) {
+    return await this.prisma.post.findMany({
+      where: { author: { username: username } },
+      include: { likes: true, author: true, comments: true },
+      orderBy: { published: "desc" }
+    });
+  }
+
+  // Get all posts of following users:
   async getPostsOfFollowing(id: string) {
     const usersArray = await this.usersArray(id);
     const ids = usersArray?.following.map((id) => id.followingId);
@@ -73,8 +82,6 @@ export class PostService {
       where: { authorId: { in: ids } },
       include: { likes: true, author: true, comments: true },
       orderBy: { published: "desc" }
-      // select: { posts: true },
-      // select: { posts: { orderBy: { published: "desc" } } },
     });
   }
 

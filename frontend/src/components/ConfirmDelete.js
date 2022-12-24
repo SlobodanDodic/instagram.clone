@@ -18,18 +18,7 @@ export default function ConfirmDelete() {
         setUser(null);
         setDeleteModal()
       })
-      .catch((err) => {
-        if (err) {
-          toast.error('Response - ' + err)
-          console.log('Response - ' + err);
-        } else if (err.request) {
-          toast.error('Request - ' + err.request)
-          console.log('Request - ' + err.request);
-        } else {
-          toast.error('Error - ' + err.errorMessage)
-          console.log('Error - ' + err);
-        }
-      })
+      .catch((err) => console.log('Response - ' + err))
       .finally(() => setIsLoading(false));
   };
 
