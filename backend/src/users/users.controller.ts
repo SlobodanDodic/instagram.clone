@@ -6,7 +6,7 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
-  // Gey logged user's profile:
+  // Get logged user's profile:
   @UseGuards(JwtAuthGuard)
   @Get('me/:username')
   getMyUser(@Param() params: { username: string }, @Req() req) {
@@ -49,15 +49,9 @@ export class UsersController {
     return this.usersService.findUserWithFollows(username);
   }
 
-  // Get all user's posts with likes and comments:
-  @Get("userPosts/:username")
-  userPosts(@Param('username') username: string) {
-    return this.usersService.userPosts(username);
-  }
-
   // Get all following users of following users:
-  @Get('discovery/:id')
-  discovery(@Param('id') id: string) {
-    return this.usersService.discovery(id);
+  @Get('discover/:id')
+  discover(@Param('id') id: string) {
+    return this.usersService.discover(id);
   }
 }

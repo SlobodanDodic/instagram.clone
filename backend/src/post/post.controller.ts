@@ -41,6 +41,12 @@ export class PostController {
     return this.postService.getComments(id);
   }
 
+  // Get all user's posts with likes and comments:
+  @Get("userPosts/:username")
+  userPosts(@Param('username') username: string) {
+    return this.postService.userPosts(username);
+  }
+
   // Get all posts of following users:
   @Get('getPostsOfFollowing/:id')
   getPostsOfFollowing(@Param('id') id: string) {

@@ -6,29 +6,25 @@ import EditProfile from "../../components/EditProfile";
 import Posts from "../../components/Posts";
 import ProfileStats from "../../components/ProfileStats";
 import Spinner from "../../components/Spinner";
-import { toast } from "react-toastify";
+import useAxios from "../../hooks/useAxios";
+import FetchError from "../../components/FetchError";
 
 export default function ProfilePage() {
-  const { user, postCountToggle, followingToggle, followersToggle, isLoading, setIsLoading, loggedUser, instance } = useContext(AuthContext);
+  const { user, postCountToggle, followingToggle, followersToggle } = useContext(AuthContext);
   const [userProfile, setUserProfile] = useState({});
   const [showModal, setShowModal] = useToggle(false)
   const { username } = useParams();
   const usersPosts = userProfile?.posts;
+  const { data, loading, fetchError } = useAxios(`users/profile/${username}`);
+
+  console.log(userProfile);
 
   useEffect(() => {
-    setIsLoading(true);
-    instance
-      .get(`users/profile/${username}`)
-      .then((res) => { setUserProfile(res?.data) })
-      .catch((err) => {
-        toast.error('Response - ' + err);
-        console.log('Response - ' + err);
-      })
-      .finally(() => { setIsLoading(false) });
-    // eslint-disable-next-line
-  }, [username])
+    setUserProfile(data)
+  }, [data, userProfile])
 
-  if (isLoading) return <Spinner />;
+  if (loading) return <Spinner />
+  if (fetchError) return <FetchError fetchError={fetchError} />
 
   return (
     <div className="flex flex-col w-screen max-w-screen-xl p-2 mx-auto text-sm text-gray-600 md:flex-row">
@@ -44,7 +40,7 @@ export default function ProfilePage() {
           </button>
         }
 
-        <ProfileStats userProfile={userProfile} usersPosts={usersPosts} username={username} loggedUser={loggedUser} />
+        <ProfileStats userProfile={userProfile} usersPosts={usersPosts} username={username} />
 
         <div className="pb-3 border-b border-gray-200">
           <p className='pb-3 italic font-medium text-center text-gray-700'>About me:</p>

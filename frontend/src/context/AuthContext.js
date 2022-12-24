@@ -22,7 +22,6 @@ export const AuthProvider = ({ children }) => {
   const [followingToggle, setFollowingToggle] = useToggle(false);
   const [followersToggle, setFollowersToggle] = useToggle(false);
 
-
   useEffect(() => {
     localStorage.setItem('logged-user', JSON.stringify(user));
   }, [user]);

@@ -6,11 +6,24 @@ import { PrismaService } from 'prisma/prisma.service';
 export class UsersService {
   constructor(private prisma: PrismaService) { }
 
-  // Gey logged user's profile:
+  // Get logged user's profile:
   async getMyUser(username: string, req: Request) {
     const decodedUserInfo = req.user as { username: string; email: string };
 
-    const foundUser = await this.prisma.user.findUnique({ where: { username } });
+    const foundUser = await this.prisma.user.findUnique({
+      where: { username },
+      select: {
+        id: true,
+        bio: true,
+        email: true,
+        username: true,
+        hashedPassword: true,
+        profileImage: true,
+        posts: { include: { likes: true, comments: true } },
+        followers: { include: { follower: true, following: true } },
+        following: { include: { follower: true, following: true } }
+      }
+    });
 
     if (!foundUser) {
       throw new NotFoundException();
@@ -26,9 +39,7 @@ export class UsersService {
   // Get users by search:
   async findUsers(username: string) {
     return await this.prisma.user.findMany({
-      where: {
-        username: { contains: username }
-      }
+      where: { username: { contains: username } }
     });
   }
 
@@ -50,15 +61,9 @@ export class UsersService {
         email: true,
         username: true,
         profileImage: true,
-        posts: {
-          include: { likes: true, comments: true }
-        },
-        followers: {
-          include: { follower: true, following: true }
-        },
-        following: {
-          include: { follower: true, following: true }
-        }
+        posts: { include: { author: true, likes: true, comments: { include: { commentAuthor: true } } } },
+        followers: { include: { follower: true, following: true } },
+        following: { include: { follower: true, following: true } }
       }
     })
   }
@@ -66,12 +71,7 @@ export class UsersService {
   // Follow user:
   async follow(username: string, followerId: string, followingId: string) {
     return await this.prisma.follows.createMany({
-      data: [
-        {
-          followerId: followerId,
-          followingId: followingId,
-        }
-      ],
+      data: [{ followerId: followerId, followingId: followingId }],
     });
   }
 
@@ -94,32 +94,20 @@ export class UsersService {
       select: {
         id: true,
         username: true,
-        followers: {
-          include: { follower: true, following: true }
-        },
-        following: {
-          include: { follower: true, following: true }
-        }
+        followers: { include: { follower: true, following: true } },
+        following: { include: { follower: true, following: true } }
       }
     })
   }
 
-  // Get all user's posts with likes and comments:
-  async userPosts(username: string) {
-    return await this.prisma.user.findUnique({
-      where: { username: username },
-      include: { posts: { include: { likes: true, comments: true } } }
-    })
-  }
-
   // Get all following users of following users:
-  async discovery(id: string) {
+  async discover(id: string) {
     const usersArray = await this.usersArray(id);
     const ids = usersArray?.following.map((id) => id.followingId);
 
     return await this.prisma.user.findMany({
       where: { id: { in: ids } },
-      select: { following: { select: { followingId: true } } },
+      select: { following: { select: { following: true } } },
     });
   }
 

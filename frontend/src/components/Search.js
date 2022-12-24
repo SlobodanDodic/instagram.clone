@@ -8,7 +8,6 @@ import Spinner from './Spinner';
 
 export default function Search() {
   const { instance, searchModal, setSearchModal, isLoading, setIsLoading } = useContext(AuthContext);
-
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
