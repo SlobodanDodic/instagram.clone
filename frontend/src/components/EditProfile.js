@@ -1,21 +1,29 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { useParams } from "react-router-dom";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import AuthContext from '../context/AuthContext';
 import { IoMdClose } from 'react-icons/io';
 import avatar from '../assets/avatar.jpeg';
-import AuthContext from '../context/AuthContext';
-import Spinner from './Spinner';
-import { toast } from "react-toastify";
 
 export default function EditProfile({ setShowModal, userProfile }) {
-  const { isLoading, setIsLoading, instance } = useContext(AuthContext);
+  const { instance } = useContext(AuthContext);
   const { username } = useParams();
   const [bio, setBio] = useState('');
   const [profileImage, setProfileImage] = useState({ myFile: "" });
+  const queryClient = useQueryClient()
 
-  useEffect(() => {
-    setBio(userProfile?.bio);
-    setProfileImage(userProfile?.profileImage);
-  }, [userProfile]);
+  const updateUsersProfile = async () => {
+    return await instance.patch(`/users/${username}`, { bio: bio, profileImage: profileImage?.myFile });
+  }
+
+  const updateUsersProfileMutation = useMutation(updateUsersProfile, {
+    onSuccess: () => queryClient.invalidateQueries('findUserProfile')
+  })
+
+  const updateProfile = () => {
+    updateUsersProfileMutation.mutate();
+    setShowModal();
+  }
 
   const convertToBase64 = (file) => {
     return new Promise((resolve, reject) => {
@@ -30,23 +38,6 @@ export default function EditProfile({ setShowModal, userProfile }) {
     const base64 = await convertToBase64(file);
     setProfileImage({ ...profileImage, myFile: base64 });
   };
-
-  const updateProfile = () => {
-    setIsLoading(true);
-    instance
-      .patch(`users/${username}`, { bio: bio, profileImage: profileImage?.myFile })
-      .then((res) => toast.success('Successfully edited!'))
-      .catch((err) => console.log('Response - ' + err))
-      .finally(() => setIsLoading(false));
-  };
-
-  const submit = () => {
-    updateProfile();
-    setShowModal()
-    window.location.reload();
-  }
-
-  if (isLoading) return <Spinner />;
 
   return (
     <div className='absolute top-0 left-0 z-50'>
@@ -63,17 +54,15 @@ export default function EditProfile({ setShowModal, userProfile }) {
                 <img src={profileImage === '' ? userProfile?.profileImage : avatar} alt={userProfile?.username} className="profile" />
               )}
             </div>
-
             <div className='px-2 py-1 mx-auto text-xs text-gray-400 rounded-lg shadow-inner bg-gray-50/50'>
               <input type="file" accept="image/*" label="Image" name="myFile" onChange={(e) => handleFileUpload(e)} />
             </div>
-
             <div className="w-full px-3 my-5">
               <label className='block mb-3 font-medium text-center text-gray-600' htmlFor="bio">About me:</label>
               <textarea rows="3" type="text" placeholder={userProfile?.bio} defaultValue={bio} onChange={(e) => setBio(e.target.value)} className='block w-full px-2 py-1 mx-auto text-xs rounded-lg shadow-inner bg-gray-50/50 md:w-1/2' />
             </div>
 
-            <div> <button className='mt-4 btn-add bg-blue' onClick={submit}> Submit </button>  </div>
+            <div> <button className='mt-4 btn-add bg-blue' onClick={updateProfile}> Submit </button>  </div>
           </div>
 
         </div>

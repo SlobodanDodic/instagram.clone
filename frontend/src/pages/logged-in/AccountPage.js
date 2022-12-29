@@ -3,7 +3,7 @@ import AuthContext from '../../context/AuthContext';
 import useToggle from '../../hooks/useToggle';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import AccountInput from '../../components/Form/AccountInput';
-import Spinner from '../../components/Spinner';
+import { Spinner } from '../../components/Spinner';
 import { toast } from "react-toastify";
 
 const initialState = { username: '', email: '', password: '', confirmPassword: '' }

@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const useAxios = (url) => {
   const [data, setData] = useState(null);
-  const [fetchError, setFetchError] = useState(null);
+  const [axiosError, setAxiosError] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const dataUrl = `http://localhost:5000/${url}`
@@ -20,11 +20,11 @@ const useAxios = (url) => {
         });
         if (isMounted) {
           setData(response.data);
-          setFetchError(null);
+          setAxiosError(null);
         }
       } catch (err) {
         if (isMounted) {
-          setFetchError(err.message);
+          setAxiosError(err.message);
           console.log(err);
           setData([]);
         }
@@ -43,7 +43,7 @@ const useAxios = (url) => {
     return cleanUp;
   }, [dataUrl]);
 
-  return { data, fetchError, loading };
+  return { data, axiosError, loading };
 }
 
 export default useAxios;

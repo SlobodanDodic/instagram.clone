@@ -1,33 +1,29 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import AuthContext from "../../context/AuthContext";
+import { useQuery } from '@tanstack/react-query'
 import { useParams } from "react-router-dom";
 import useToggle from "../../hooks/useToggle";
+import { Spinner, ErrorInfo } from "../../components/Spinner";
+
 import EditProfile from "../../components/EditProfile";
 import Posts from "../../components/Posts";
 import ProfileStats from "../../components/ProfileStats";
-import Spinner from "../../components/Spinner";
-import useAxios from "../../hooks/useAxios";
-import FetchError from "../../components/FetchError";
 import Following from "../../components/Following";
 import Followers from "../../components/Followers";
 
 export default function ProfilePage() {
-  const { user, postCountToggle, followingToggle, followersToggle, setPostCountToggle, setFollowingToggle, setFollowersToggle } = useContext(AuthContext);
-  const [userProfile, setUserProfile] = useState({});
+  const { user, instance, postCountToggle, followingToggle, followersToggle } = useContext(AuthContext);
   const [showModal, setShowModal] = useToggle(false)
   const { username } = useParams();
-  const usersPosts = userProfile?.posts;
-  const { data, loading, fetchError } = useAxios(`users/profile/${username}`);
 
-  useEffect(() => {
-    setUserProfile(data)
-    setPostCountToggle(true)
-    setFollowingToggle(false)
-    setFollowersToggle(false)
-  }, [data, userProfile])
+  const findUserProfile = async () => {
+    const data = await instance.get(`/users/profile/${username}`);
+    return data.data;
+  }
+  const { data: userProfile, isLoading, isError, error } = useQuery(['findUserProfile', username], () => findUserProfile())
 
-  if (loading) return <Spinner />
-  if (fetchError) return <FetchError fetchError={fetchError} />
+  if (isLoading) return <Spinner />
+  if (isError) return <ErrorInfo error={error} />
 
   return (
     <div className="flex flex-col w-screen max-w-screen-xl p-2 mx-auto text-sm text-gray-600 md:flex-row">
@@ -41,7 +37,7 @@ export default function ProfilePage() {
             <div className="pt-1 font-medium text-orange-500">✎ Edit your profile</div>
           </button>
         }
-        <ProfileStats userProfile={userProfile} usersPosts={usersPosts} username={username} />
+        <ProfileStats userProfile={userProfile} username={username} />
 
         <div className="pb-3 border-b border-gray-200">
           <p className='pb-3 italic font-medium text-center text-gray-700'>About me:</p>
@@ -59,7 +55,7 @@ export default function ProfilePage() {
 
         {postCountToggle && <div className="w-full">
           <p className="stat-text">Posts</p>
-          <Posts usersPosts={usersPosts} />
+          <Posts usersPosts={userProfile?.posts} />
         </div>}
 
         {followingToggle && <div className="w-full">

@@ -8,7 +8,7 @@ import logoText from '../../assets/logoText.png'
 import Bottom from "../../components/Form/Bottom";
 import { toast } from "react-toastify";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import Spinner from "../../components/Spinner";
+import { Spinner } from "../../components/Spinner";
 
 const initialState = { username: '', email: '', password: '', confirmPassword: '' }
 

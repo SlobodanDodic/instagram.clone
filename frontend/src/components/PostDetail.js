@@ -1,40 +1,55 @@
 import { useContext } from 'react';
 import { IoMdClose } from 'react-icons/io';
 import AuthContext from '../context/AuthContext';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Comments from './Comments';
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
+
 var relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(relativeTime)
 
 export default function PostDetail({ post, setShowPostDetail }) {
   const { instance, loggedUser } = useContext(AuthContext);
-  const postId = post.id;
-  const comments = post.comments;
+  const queryClient = useQueryClient()
+
   const postByLoggedUser = post.authorId === loggedUser.id;
   const likeId = post?.likes?.find(({ userId }) => userId === loggedUser.id);
   const userLikedPost = post?.likes?.some(element => element.userId === loggedUser.id);
 
+  const removePost = async () => {
+    return await instance.delete(`/post/${post.id}`)
+  }
+  const removePostMutation = useMutation(removePost, {
+    onSuccess: () => queryClient.invalidateQueries('findUserProfile')
+  })
+
+  const createLike = async () => {
+    return await instance.post(`/post/like`, { postId: post.id, userId: loggedUser.id })
+  }
+  const createLikeMutation = useMutation(createLike, {
+    onSuccess: () => queryClient.invalidateQueries('findUserProfile')
+  })
+
+  const removeLike = async () => {
+    return await instance.delete(`/post/like/${likeId?.id}`)
+  }
+  const removeLikeMutation = useMutation(removeLike, {
+    onSuccess: () => queryClient.invalidateQueries('findUserProfile')
+  })
+
   const toggleLike = () => {
     if (!userLikedPost) {
-      instance
-        .post(`post/like`, { postId: postId, userId: loggedUser.id })
-        .then((res) => { toast.success('Liked!') })
-        .catch((err) => { console.log('Error - ' + err) })
+      createLikeMutation.mutate();
     } else {
-      instance
-        .delete(`post/like/${likeId?.id}`)
-        .then((res) => { toast.success('Unliked!') })
-        .catch((err) => { console.log('Error - ' + err) })
+      removeLikeMutation.mutate()
     }
   };
 
-  const removePost = () => {
-    console.log(postId);
-    instance
-      .delete(`post/${postId}`)
-      .then((res) => { toast.success('Post deleted!') })
-      .catch((err) => { console.log('Error - ' + err) })
+  const deletePost = () => {
+    removePostMutation.mutate();
+    setShowPostDetail();
+    toast.success('Post deleted!')
   };
 
   return (
@@ -48,7 +63,7 @@ export default function PostDetail({ post, setShowPostDetail }) {
               <div className="flex flex-col justify-between h-full">
                 {!postByLoggedUser ? (
                   <button onClick={toggleLike} className="flex justify-center text-xl text-red-500 pb-7 h-1/3 md:flex-col">{!userLikedPost ? '♡ Like me!' : "♥ Liked!"}</button>
-                ) : (<button onClick={removePost} className="flex justify-center text-lg text-red-500 drop-shadow-lg pb-7 h-1/3 md:flex-col">✗ Delete post</button>)}
+                ) : (<button onClick={deletePost} className="flex justify-center text-lg text-red-500 drop-shadow-lg pb-7 h-1/3 md:flex-col">✗ Delete post</button>)}
                 <div className="flex justify-around md:flex-col h-2/3">
                   <div className="pb-1 uppercase">⦿ {post?.author?.username}'s post</div>
                   <div className="pb-1 text-gray-500">⏱ {dayjs(post?.published).format('MMM. DD, YYYY')}</div>
@@ -59,7 +74,7 @@ export default function PostDetail({ post, setShowPostDetail }) {
               </div>
             </div>
           </div>
-          <div className="flex w-full max-w-screen-lg p-2 rounded-r-lg h-1/3"><Comments id={postId} comments={comments} /></div>
+          <div className="flex w-full max-w-screen-lg p-2 rounded-r-lg h-1/3"><Comments id={post.id} comments={post.comments} /></div>
         </div>
       </div>
     </div>

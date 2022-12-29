@@ -4,7 +4,7 @@ import FormInput from "../../components/Form/FormInput";
 import logScreen from '../../assets/logScreen.png'
 import logoText from '../../assets/logoText.png'
 import Bottom from "../../components/Form/Bottom";
-import Spinner from "../../components/Spinner";
+import { Spinner } from "../../components/Spinner";
 import { toast } from "react-toastify";
 
 const loginInputs = [
