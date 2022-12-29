@@ -80,7 +80,7 @@ export class PostService {
 
     return await this.prisma.post.findMany({
       where: { authorId: { in: ids } },
-      include: { likes: true, author: true, comments: true },
+      include: { likes: true, author: true, comments: { include: { commentAuthor: true } } },
       orderBy: { published: "desc" }
     });
   }

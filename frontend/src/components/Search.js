@@ -3,16 +3,15 @@ import { useContext, useState } from 'react';
 import { IoMdClose } from 'react-icons/io';
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import { Spinner } from './Spinner';
 import avatar from '../assets/avatar.jpeg';
-import Spinner from './Spinner';
 
 export default function Search() {
   const { instance, searchModal, setSearchModal, isLoading, setIsLoading } = useContext(AuthContext);
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
-  const search = (e) => {
-    e.preventDefault();
+  const search = () => {
     setIsLoading(true);
     instance
       .get("users/" + searchText)
@@ -41,7 +40,7 @@ export default function Search() {
             <button onClick={search} className="flex items-center w-5/6 h-8 px-2 mx-auto my-1 text-sm text-white bg-blue-500 border rounded md:mx-2 md:w-44 hover:bg-blue-600/90">Search by username</button>
           </div>
 
-          {searchResults.length > 0 ? (
+          {searchResults?.length > 0 ? (
             <div className='flex flex-wrap justify-center'>
               {searchResults.sort((a, b) => a.username > b.username ? 1 : -1).map((item, i) => (
                 <Link key={i} to={`/profile/${item?.username}`} state={{ data: item }}

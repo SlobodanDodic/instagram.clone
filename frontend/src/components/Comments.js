@@ -1,5 +1,6 @@
 import { useContext, useState } from 'react';
 import AuthContext from '../context/AuthContext';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from "react-router-dom";
 import avatar from '../assets/avatar.jpeg'
 import dayjs from "dayjs";
@@ -8,16 +9,22 @@ var relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(relativeTime)
 
 export default function Comments({ id, comments }) {
-  const { loggedUser, instance } = useContext(AuthContext);
-  const [comment, setComment] = useState('')
-  const user = loggedUser.id
+  const { instance, loggedUser } = useContext(AuthContext);
+  const [comment, setComment] = useState('');
+  const queryClient = useQueryClient();
 
-  const sendComment = () => {
-    instance
-      .post(`post/comment`, { body: comment, post: id, commentAuthor: user })
-      .then((res) => setComment(''))
-      .catch((err) => console.log('Error - ' + err))
-  };
+  const createComment = async () => {
+    return await instance.post(`/post/comment`, { body: comment, post: id, commentAuthor: loggedUser.id });
+  }
+  const createCommentMutation = useMutation(createComment, {
+    onSuccess: () => queryClient.invalidateQueries(['findUserProfile'])
+  })
+
+  const sendComment = (e) => {
+    e.preventDefault();
+    createCommentMutation.mutate();
+    setComment('');
+  }
 
   return (
     <div className="flex flex-col w-full sm:flex-row">
@@ -34,7 +41,7 @@ export default function Comments({ id, comments }) {
       </div>
 
       <div className="flex flex-col w-full p-2 overflow-scroll text-gray-600 normal-case sm:w-2/3">
-        {comments.map((single) => (
+        {comments.sort((a, b) => a.created_at > b.created_at ? 1 : -1).map((single) => (
           <div key={single.id} className="flex mb-4 ml-1">
             <Link to={`/profile/${single?.commentAuthor?.username}`} className="flex flex-col justify-center w-16">
               <img src={single?.commentAuthor?.profileImage ? single?.commentAuthor?.profileImage : avatar} alt='profile' className='inline object-cover p-px rounded-full w-11 h-11 bg-gradient-to-b from-red-600 via-purple-600 to-pink-700' />

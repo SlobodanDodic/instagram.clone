@@ -1,31 +1,30 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import AuthContext from "../../context/AuthContext";
-import Spinner from "../../components/Spinner";
-import FetchError from "../../components/FetchError";
-import useAxios from "../../hooks/useAxios";
+import { useQuery } from "@tanstack/react-query";
+import { Spinner, ErrorInfo } from "../../components/Spinner";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import avatar from '../../assets/avatar.jpeg';
 
 export default function DiscoverPage() {
-  const { loggedUser } = useContext(AuthContext);
-  const [discover, setDiscover] = useState({});
-  const url = `users/discover/${loggedUser.id}`;
-  const { data, fetchError, loading } = useAxios(url);
+  const { instance, loggedUser } = useContext(AuthContext);
 
-  useEffect(() => {
-    setDiscover(data?.[0]?.following);
-  }, [data])
+  const discover = async () => {
+    const data = await instance.get(`/users/discover/${loggedUser.id}`);
+    return data.data;
+  }
+  const { data, isLoading, isError, error } = useQuery(['discover'], () => discover())
+  const discoverUsers = data?.[0]?.following;
 
-  if (loading) return <Spinner />
-  if (fetchError) return <FetchError fetchError={fetchError} />
+  if (isLoading) return <Spinner />
+  if (isError) return <ErrorInfo error={error} />
 
   return (
     <div className='flex flex-col items-center justify-center px-1 py-5'>
       <div className="my-4 text-gray-500">Discover some new friends: </div>
-      {discover?.length > 0 ? (
+      {discoverUsers?.length > 0 ? (
         <div className='flex flex-wrap justify-center'>
-          {discover?.sort((a, b) => a.username > b.username ? 1 : -1).map((item, i) => (
+          {discoverUsers?.sort((a, b) => a.username > b.username ? 1 : -1).map((item, i) => (
             <Link key={i} to={`/profile/${item?.following?.username}`} state={{ data: item.following }}
               onClick={() => { toast.success(`Welcome to @${item?.following?.username}'s profile`) }}
               className="flex px-3 py-1 m-3 rounded shadow">

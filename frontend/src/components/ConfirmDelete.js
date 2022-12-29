@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import AuthContext from '../context/AuthContext';
 import { IoMdClose } from 'react-icons/io';
-import Spinner from './Spinner';
+import { Spinner } from './Spinner';
 import { toast } from "react-toastify";
 import deadpool from '../assets/deadpool.png'
 

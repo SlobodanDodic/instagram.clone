@@ -6,7 +6,7 @@ import logoText from '../../assets/logoText.png'
 import Bottom from "../../components/Form/Bottom";
 import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
-import Spinner from "../../components/Spinner";
+import { Spinner } from "../../components/Spinner";
 
 export default function ResetPassword() {
   const { isLoading, setIsLoading, instance } = useContext(AuthContext);

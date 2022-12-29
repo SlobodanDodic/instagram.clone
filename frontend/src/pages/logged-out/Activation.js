@@ -2,7 +2,7 @@ import { useContext } from "react";
 import AuthContext from "../../context/AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import Spinner from '../../components/Spinner';
+import { Spinner } from '../../components/Spinner';
 import { BsCheck2Circle } from 'react-icons/bs';
 
 export default function Activation() {

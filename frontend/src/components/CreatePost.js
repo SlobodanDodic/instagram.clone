@@ -1,14 +1,29 @@
 import { useContext, useState } from 'react';
 import AuthContext from '../context/AuthContext';
-import Spinner from './Spinner';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import media from '../assets/media.png'
 import { IoMdClose } from 'react-icons/io';
 import { toast } from "react-toastify";
 
 export default function CreatePost() {
-  const { postModal, setPostModal, isLoading, setIsLoading, instance, loggedUser } = useContext(AuthContext);
+  const { instance, postModal, setPostModal, loggedUser } = useContext(AuthContext);
   const [caption, setCaption] = useState('');
   const [photo, setPhoto] = useState({ myFile: "" });
+
+  const queryClient = useQueryClient()
+
+  const newPost = async () => {
+    return await instance.post(`/post/create`, { caption: caption, postImage: photo?.myFile, author: loggedUser?.username });
+  }
+  const newPostMutation = useMutation(newPost, { onSuccess: () => queryClient.invalidateQueries('findUserProfile') })
+
+  const createPost = () => {
+    newPostMutation.mutate();
+    setCaption('');
+    setPhoto({ myFile: "" });
+    setPostModal();
+    toast.success('Successfully uploaded!');
+  }
 
   const convertToBase64 = (file) => {
     return new Promise((resolve, reject) => {
@@ -18,32 +33,14 @@ export default function CreatePost() {
       fileReader.onerror = (error) => { reject(error) };
     });
   };
+
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     const base64 = await convertToBase64(file);
     setPhoto({ ...photo, myFile: base64 });
   };
 
-  const createPost = () => {
-    setIsLoading(true);
-    instance
-      .post(`post/create`, { caption: caption, postImage: photo?.myFile, author: loggedUser?.username })
-      .then((res) => { toast.success('Successfully uploaded!') })
-      .catch((err) => {
-        toast.error('Response - ' + err)
-        console.log('Response - ' + err);
-      })
-      .finally(() => {
-        setIsLoading(false);
-        setCaption('');
-        setPhoto({ myFile: "" });
-        setPostModal();
-      });
-  };
-
   const cleanAndExit = () => { setPostModal() }
-
-  if (isLoading) return <Spinner />;
 
   return (
     <div className={postModal ? 'absolute z-50' : 'hidden'}>

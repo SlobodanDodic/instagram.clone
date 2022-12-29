@@ -1,28 +1,27 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import AuthContext from "../../context/AuthContext";
+import { useQuery } from "@tanstack/react-query";
 import useToggle from "../../hooks/useToggle";
-import Spinner from "../../components/Spinner";
+import { Spinner, ErrorInfo } from "../../components/Spinner";
 import PostDetail from "../../components/PostDetail";
-import FetchError from "../../components/FetchError";
-import useAxios from "../../hooks/useAxios";
 import dayjs from "dayjs";
 
 var relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(relativeTime)
 
 export default function HomePage() {
-  const { loggedUser } = useContext(AuthContext);
+  const { instance, loggedUser } = useContext(AuthContext);
   const [showPostDetail, setShowPostDetail] = useToggle(false)
-  const [postsOfFollowing, setPostsOfFollowing] = useState({});
   const [singlePost, setSinglePost] = useState(null)
-  const { data, fetchError, loading } = useAxios(`post/getPostsOfFollowing/${loggedUser.id}`);
 
-  useEffect(() => {
-    setPostsOfFollowing(data);
-  }, [data])
+  const getPostsOfFollowing = async () => {
+    const data = await instance.get(`/post/getPostsOfFollowing/${loggedUser?.id}`);
+    return data.data;
+  }
+  const { data: postsOfFollowing, isLoading, isError, error } = useQuery(['getPostsOfFollowing', loggedUser], () => getPostsOfFollowing())
 
-  if (loading) return <Spinner />
-  if (fetchError) return <FetchError fetchError={fetchError} />
+  if (isLoading) return <Spinner />
+  if (isError) return <ErrorInfo error={error} />
 
   return (
     <div className='flex flex-col items-center justify-center px-1 py-5'>
@@ -49,4 +48,5 @@ export default function HomePage() {
         : <div className="px-4 mt-4 text-center text-gray-500">You don't follow anyone, yet, so no posts to see...</div>}
     </div>
   )
+
 }

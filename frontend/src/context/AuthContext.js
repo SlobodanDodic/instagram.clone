@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import useToggle from "../hooks/useToggle";
+import { useQuery } from "@tanstack/react-query";
 import axios from 'axios';
 
 const AuthContext = createContext({});
@@ -11,13 +12,10 @@ export const AuthProvider = ({ children }) => {
     return initialValue || null;
   })
   const [isLoading, setIsLoading] = useState(false)
-  const [loggedUser, setLoggedUser] = useState({});
-  const [token, setToken] = useState('')
 
   const [postModal, setPostModal] = useToggle(false)
   const [searchModal, setSearchModal] = useToggle(false)
   const [deleteModal, setDeleteModal] = useToggle(false)
-
   const [postCountToggle, setPostCountToggle] = useToggle(true);
   const [followingToggle, setFollowingToggle] = useToggle(false);
   const [followersToggle, setFollowersToggle] = useToggle(false);
@@ -36,29 +34,20 @@ export const AuthProvider = ({ children }) => {
     }
   });
 
-  useEffect(() => {
-    if (user) {
-      instance
-        .get("users/me/" + user)
-        .then((res) => {
-          setLoggedUser(res.data?.user);
-          setToken(res.data?.user?.token);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    }
-    // eslint-disable-next-line
-  }, [user])
+  const getLoogedUser = async () => {
+    const data = await instance.get(`/users/me/${user}`);
+    return data.data;
+  }
+
+  const { data } = useQuery(['loggedUser'], () => getLoogedUser())
+  const loggedUser = (data?.user);
+  const token = (data?.user?.token);
 
   return (
     <AuthContext.Provider
       value={{
-        instance,
-        user, setUser,
-        token, setToken,
+        instance, token, user, setUser, loggedUser,
         isLoading, setIsLoading,
-        loggedUser, setLoggedUser,
         postCountToggle, setPostCountToggle, followingToggle, setFollowingToggle, followersToggle, setFollowersToggle,
         postModal, setPostModal, searchModal, setSearchModal, deleteModal, setDeleteModal,
       }}>
