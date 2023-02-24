@@ -1,5 +1,6 @@
 import { useContext } from "react";
 import AuthContext from "../../context/AuthContext";
+import ToggleContext from "../../context/ToggleContext";
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from "react-router-dom";
 import useToggle from "../../hooks/useToggle";
@@ -8,11 +9,11 @@ import { Spinner, ErrorInfo } from "../../components/Spinner";
 import EditProfile from "../../components/EditProfile";
 import Posts from "../../components/Posts";
 import ProfileStats from "../../components/ProfileStats";
-import Following from "../../components/Following";
-import Followers from "../../components/Followers";
+import UserLink from "../../components/UserLink";
 
 export default function ProfilePage() {
-  const { user, instance, postCountToggle, followingToggle, followersToggle } = useContext(AuthContext);
+  const { user, instance } = useContext(AuthContext);
+  const { postCountToggle, followingToggle, followersToggle } = useContext(ToggleContext);
   const [showModal, setShowModal] = useToggle(false)
   const { username } = useParams();
 
@@ -50,17 +51,35 @@ export default function ProfilePage() {
         <h1 className="text-lg font-medium">@{userProfile?.username}'s_work:</h1>
         {followersToggle && <div className="w-full">
           <p className="stat-text">Followers:</p>
-          <Followers results={userProfile?.followers} text={'No followers yet...'} />
+          {userProfile?.followers?.length > 0 ? (
+            <div className='flex flex-wrap justify-center'>
+              {userProfile?.followers.map((item, i) => (
+                <UserLink followerItem={item} key={i} />
+
+              ))}
+            </div>
+          ) : (
+            <div className='flex flex-wrap justify-center pt-5 text-sm text-gray-700'>No followers yet...</div>
+          )}
         </div>}
 
         {postCountToggle && <div className="w-full">
           <p className="stat-text">Posts</p>
-          <Posts usersPosts={userProfile?.posts} />
+          <Posts usersPosts={userProfile?.posts} isLoading={isLoading} />
         </div>}
 
         {followingToggle && <div className="w-full">
           <p className="stat-text">Following:</p>
-          <Following results={userProfile?.following} text={'Not followed yet...'} />
+          {userProfile?.following?.length > 0 ? (
+            <div className='flex flex-wrap justify-center'>
+              {userProfile?.following.map((item, i) => (
+                <UserLink followingItem={item} key={i} />
+
+              ))}
+            </div>
+          ) : (
+            <div className='flex flex-wrap justify-center pt-5 text-sm text-gray-700'>Not followed yet...</div>
+          )}
         </div>}
       </div>
     </div>

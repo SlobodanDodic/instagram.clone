@@ -20,7 +20,7 @@ export class AuthDto {
 
   @IsOptional()
   @IsString()
-  public token: string;
+  public token?: string;
 }
 
 export class AuthDtoSignIn {

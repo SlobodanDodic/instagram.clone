@@ -39,13 +39,15 @@ export default function App() {
           <Route path="/registration" element={<Registration />} />
           <Route path='/reset-password/:token' element={<ResetPassword />} />
           <Route path='/forgot-password' element={<ForgotPassword />} />
-          <Route path='active/:username' element={<Activation />} />
+          <Route path='activate/:token' element={<Activation />} />
 
           <Route element={<PrivateRoutes />}>
             <Route path="/account/:token" element={<AccountPage />} />
             <Route path="/discover" element={<DiscoverPage />} />
             <Route path='/' exact element={<HomePage />} />
+            <Route path='/:postId' exact element={<HomePage />} />
             <Route path='/profile/:username' element={<ProfilePage />} />
+            <Route path='/profile/:username/:postId' element={<ProfilePage />} />
 
           </Route>
           <Route path="*" element={<NotFound />} />

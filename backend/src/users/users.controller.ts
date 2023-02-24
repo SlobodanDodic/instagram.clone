@@ -1,16 +1,22 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/jwt.guard';
+import { Body, Controller, Get, Param, Patch, Post, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { GetCurrentUser } from 'src/common/decorators/get-current-user.decorator';
+import { Public } from 'src/common/decorators/public.decorator';
+import { RefreshedTokenGuard } from 'src/common/guards/refreshed_token.guard';
 import { UsersService } from './users.service';
 
+@Public()
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
   // Get logged user's profile:
-  @UseGuards(JwtAuthGuard)
-  @Get('me/:username')
-  getMyUser(@Param() params: { username: string }, @Req() req) {
-    return this.usersService.getMyUser(params.username, req);
+  @UseGuards(RefreshedTokenGuard)
+  @Get('me')
+  getMyProfile(@GetCurrentUser('refreshToken') refreshToken: string) {
+    return this.usersService.getMyProfile(refreshToken);
   }
 
   // Get users by search:
@@ -20,9 +26,20 @@ export class UsersController {
   }
 
   // Update logged user's profile:
-  @Patch(':username')
-  updateProfile(@Param('username') username: string, @Body('profileImage') profileImage: string, @Body('bio') bio: string) {
-    return this.usersService.updateProfile(username, profileImage, bio);
+  @UseGuards(RefreshedTokenGuard)
+  @Patch('me')
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: './avatars',
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const filename = `${uniqueSuffix}${extname(file.originalname)}`;
+        cb(null, filename);
+      }
+    })
+  }))
+  updateProfile(@GetCurrentUser('refreshToken') refreshToken: string, @Body('bio') bio: string, @UploadedFile() file: Express.Multer.File) {
+    return this.usersService.updateProfile(refreshToken, bio, file);
   }
 
   // Get user's profile:
@@ -31,27 +48,10 @@ export class UsersController {
     return this.usersService.findUserProfile(username);
   }
 
-  // Follow user:
-  @Post('follow/:username')
-  follow(@Param('username') username: string, @Body('followerId') followerId: string, @Body('followingId') followingId: string) {
-    return this.usersService.follow(username, followingId, followerId);
+  // Get user's avatars:
+  @Get('avatars/:fileId')
+  async serveAvatar(@Param('fileId') fileId: string, @Res() res): Promise<any> {
+    res.sendFile(fileId, { root: 'avatars' });
   }
 
-  // Unfollow user:
-  @Delete('follow/:username')
-  followRemove(@Param('username') username: string, @Body('followerId') followerId: string, @Body('followingId') followingId: string) {
-    return this.usersService.followRemove(username, followingId, followerId);
-  }
-
-  // Get all users that logged user follows and who is following him:
-  @Get(':username/follows')
-  findUserWithFollows(@Param('username') username: string) {
-    return this.usersService.findUserWithFollows(username);
-  }
-
-  // Get all following users of following users:
-  @Get('discover/:id')
-  discover(@Param('id') id: string) {
-    return this.usersService.discover(id);
-  }
 }

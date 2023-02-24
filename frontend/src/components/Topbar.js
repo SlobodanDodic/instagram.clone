@@ -1,4 +1,5 @@
 import AuthContext from '../context/AuthContext';
+import ToggleContext from '../context/ToggleContext';
 import useToggle from '../hooks/useToggle';
 import { useContext } from 'react';
 import { Link } from 'react-router-dom';
@@ -12,17 +13,38 @@ import { GoHome } from 'react-icons/go';
 import logoText from '../assets/logoText.png';
 import logo from '../assets/logo.png';
 import avatar from '../assets/avatar.jpeg';
+import { useMutation } from '@tanstack/react-query';
 
 export default function Topbar() {
-  const { setUser, user, setPostModal, setSearchModal, loggedUser } = useContext(AuthContext);
+  const { user, setUser, setToken, instance, loggedUser } = useContext(AuthContext);
+  const { setPostModal, setSearchModal } = useContext(ToggleContext);
+
   const [open, setOpen] = useToggle(false);
 
   const iconStyle = { height: "1.45rem", width: "1.45rem", marginRight: "1rem" }
   const iconStyleDrop = { height: "1.25rem", width: "1.25rem", marginRight: "1rem" }
 
-  const signOut = () => {
-    setUser(null);
-    toast.success('Successfully logged out!');
+  // eslint-disable-next-line
+  const getAvatar = async () => {
+    return await instance.get(`/users/${loggedUser?.profileImage}`);
+  }
+
+  const signoutAxios = async (data) => {
+    const res = await instance.post('auth/signout')
+    return res.data
+  }
+
+  const { mutate: signout } = useMutation(signoutAxios, {
+    onError: (err) => toast.success("Error: ", err),
+    onSuccess: (res) => {
+      setUser(null);
+      setToken(null);
+      toast.success('Successfully logged out!');
+    }
+  })
+
+  const handleSubmit = () => {
+    signout()
   }
 
   return (
@@ -40,12 +62,12 @@ export default function Topbar() {
             <Link to='/discover' className='flex flex-row items-center justify-center text-sm'><RiCompassDiscoverLine style={iconStyle} /></Link>
 
             <div onClick={setOpen} className="relative z-20 flex flex-row items-center justify-center pr-3 text-sm hover:cursor-pointer">
-              <img src={loggedUser?.profileImage ? loggedUser?.profileImage : avatar} alt="avatar-profile" className='inline object-cover w-6 h-6 p-px rounded-full bg-gradient-to-b from-red-600 via-purple-600 to-pink-700' />
+              <img src={loggedUser?.profileImage ? `${process.env.REACT_APP_SERVER}/users/${loggedUser?.profileImage}` : avatar} alt="avatar-profile" className='inline object-cover w-6 h-6 p-px rounded-full bg-gradient-to-b from-red-600 via-purple-600 to-pink-700' />
               <span className="pb-1 ml-1 text-gray-dark">⌵</span>
               <div className={open ? "absolute right-0 flex flex-col w-screen px-2 bg-white border-b border-l border-gray top-12 rounded-l-md" : 'hidden'}>
                 <Link to={"/profile/" + user} className='flex flex-row items-center justify-end py-1 my-1 rounded hover:bg-gray/10'><h1 className='inline mr-5 text-xs capitalize' >@{user}</h1><MdEditNote style={iconStyleDrop} /></Link>
                 <Link to={'/account/' + user} className='flex flex-row items-center justify-end py-1 my-1 rounded hover:bg-gray/10'><h1 className='inline mr-5 text-xs' >Account</h1><MdOutlineSettingsSuggest style={iconStyleDrop} /></Link>
-                <Link onClick={signOut} className='flex flex-row items-center justify-end py-1 my-1 rounded hover:bg-gray/10'><h1 className='inline mr-5 text-xs' >Log out</h1><IoIosLogOut style={iconStyleDrop} /></Link>
+                <Link onClick={handleSubmit} className='flex flex-row items-center justify-end py-1 my-1 rounded hover:bg-gray/10'><h1 className='inline mr-5 text-xs' >Log out</h1><IoIosLogOut style={iconStyleDrop} /></Link>
               </div>
             </div>
 

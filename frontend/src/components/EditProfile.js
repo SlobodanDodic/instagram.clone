@@ -1,5 +1,4 @@
 import { useContext, useState } from 'react';
-import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import AuthContext from '../context/AuthContext';
 import { IoMdClose } from 'react-icons/io';
@@ -7,37 +6,32 @@ import avatar from '../assets/avatar.jpeg';
 
 export default function EditProfile({ setShowModal, userProfile }) {
   const { instance } = useContext(AuthContext);
-  const { username } = useParams();
   const [bio, setBio] = useState('');
-  const [profileImage, setProfileImage] = useState({ myFile: "" });
+  const [profileImage, setProfileImage] = useState();
+
+  const data = new FormData();
+  data.append('bio', bio)
+  data.append('file', profileImage)
+
   const queryClient = useQueryClient()
 
   const updateUsersProfile = async () => {
-    return await instance.patch(`/users/${username}`, { bio: bio, profileImage: profileImage?.myFile });
+    return await instance.patch(`/users/me`, data);
   }
 
   const updateUsersProfileMutation = useMutation(updateUsersProfile, {
     onSuccess: () => queryClient.invalidateQueries('findUserProfile')
   })
 
+  // eslint-disable-next-line
+  const getAvatar = async () => {
+    return await instance.get(`/users/${userProfile?.profileImage}`);
+  }
+
   const updateProfile = () => {
     updateUsersProfileMutation.mutate();
     setShowModal();
   }
-
-  const convertToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const fileReader = new FileReader();
-      fileReader.readAsDataURL(file);
-      fileReader.onload = () => { resolve(fileReader.result) };
-      fileReader.onerror = (error) => { reject(error) };
-    });
-  };
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    const base64 = await convertToBase64(file);
-    setProfileImage({ ...profileImage, myFile: base64 });
-  };
 
   return (
     <div className='absolute top-0 left-0 z-50'>
@@ -49,13 +43,13 @@ export default function EditProfile({ setShowModal, userProfile }) {
           <div className="flex flex-col items-center justify-center pb-3 text-xs">
             <div className="flex flex-col items-center my-4">
               {userProfile?.profileImage ? (
-                <img src={userProfile?.profileImage} alt={userProfile?.username} className="profile" />
+                <img src={`${process.env.REACT_APP_SERVER}/users/${userProfile?.profileImage}`} alt={userProfile?.username} className="profile" />
               ) : (
-                <img src={profileImage === '' ? userProfile?.profileImage : avatar} alt={userProfile?.username} className="profile" />
+                <img src={profileImage === '' ? URL.createObjectURL(profileImage) : avatar} alt={userProfile?.username} className="profile" />
               )}
             </div>
             <div className='px-2 py-1 mx-auto text-xs text-gray-400 rounded-lg shadow-inner bg-gray-50/50'>
-              <input type="file" accept="image/*" label="Image" name="myFile" onChange={(e) => handleFileUpload(e)} />
+              <input onChange={e => setProfileImage(e.target.files[0])} type="file" accept="image/*" label="Image" name="myFile" />
             </div>
             <div className="w-full px-3 my-5">
               <label className='block mb-3 font-medium text-center text-gray-600' htmlFor="bio">About me:</label>

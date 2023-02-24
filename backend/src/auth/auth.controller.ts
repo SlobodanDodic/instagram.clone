@@ -1,30 +1,67 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Request, Response } from '@nestjs/common';
+import { Body, Controller, Delete, HttpCode, HttpStatus, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { GetCurrentUserId } from 'src/common/decorators/get-current-user-id.decorator';
+import { GetCurrentUser } from 'src/common/decorators/get-current-user.decorator';
+import { Public } from 'src/common/decorators/public.decorator';
+import { RefreshedTokenGuard } from 'src/common/guards/refreshed_token.guard';
 import { AuthService } from './auth.service';
 import { AuthDto, AuthDtoForgot, AuthDtoSignIn } from './dto/auth.dto';
+import { Tokens } from './types/tokens.types';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) { }
 
+  @Public()
   @Post('signup')
-  signup(@Body() dto: AuthDto) {
+  @HttpCode(HttpStatus.CREATED)
+  signup(@Body() dto: AuthDto): Promise<Tokens> {
     return this.authService.signup(dto);
   }
 
+  @Public()
   @Post('signin')
-  async signin(@Body() dto: AuthDtoSignIn, @Request() req, @Response() res) {
-    return this.authService.signin(dto, req, res);
+  @HttpCode(HttpStatus.OK)
+  signin(@Body() dto: AuthDtoSignIn) {
+    return this.authService.signin(dto);
   }
 
-  @Get('signout')
-  signout(@Request() req, @Response() res) {
-    return this.authService.signout(req, res);
+  @Public()
+  @UseGuards(RefreshedTokenGuard)
+  @Post('signout')
+  @HttpCode(HttpStatus.OK)
+  signout(@GetCurrentUserId() userId: string): Promise<boolean> {
+    return this.authService.signout(userId);
   }
 
-  @Patch('active/:username')
-  update(@Param('username') username: string, @Body("isActivated") isActivated: boolean) {
-    return this.authService.update(username, isActivated);
+  @Public()
+  @UseGuards(RefreshedTokenGuard)
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  refreshTokens(@GetCurrentUserId() userId: string, @GetCurrentUser('refreshToken') refreshToken: string): Promise<Tokens> {
+    return this.authService.refreshTokens(userId, refreshToken);
   }
+
+  @Public()
+  @Patch('activate/:token')
+  activate(@Param('token') token: string) {
+    return this.authService.activate(token);
+  }
+
+  @Public()
+  @UseGuards(RefreshedTokenGuard)
+  @Patch('updateAccount/:token')
+  updateAccount(@GetCurrentUser('refreshToken') refreshToken: string, @Body() dto: AuthDto) {
+    return this.authService.updateAccount(refreshToken, dto);
+  }
+
+  @Public()
+  @UseGuards(RefreshedTokenGuard)
+  @Delete('updateAccount')
+  delete(@GetCurrentUser('refreshToken') refreshToken: string) {
+    return this.authService.delete(refreshToken);
+  }
+
+  // 
 
   @Post('forgotPassword')
   forgot(@Body() dto: AuthDtoForgot) {
@@ -36,13 +73,4 @@ export class AuthController {
     return this.authService.reset(token, password);
   }
 
-  @Patch('updateAccount/:token')
-  updateAccount(@Param('token') token: string, @Body() dto: AuthDto) {
-    return this.authService.updateAccount(token, dto);
-  }
-
-  @Delete('updateAccount/:username')
-  delete(@Param('username') username: string) {
-    return this.authService.delete(username);
-  }
 }
