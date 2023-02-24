@@ -1,14 +1,37 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
-import { CommentDto, LikeDto, PostDto } from './dto/post.dto';
+import { Body, Controller, Delete, Get, Param, Post, Res, StreamableFile, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { createReadStream } from 'fs';
+import { diskStorage } from 'multer';
+import { extname, join } from 'path';
+import { Public } from 'src/common/decorators/public.decorator';
+import { PostDto } from './dto/post.dto';
 import { PostService } from './post.service';
-
+@Public()
 @Controller('post')
 export class PostController {
   constructor(private readonly postService: PostService) { }
 
   @Post('create')
-  createPost(@Body() dto: PostDto) {
-    return this.postService.createPost(dto);
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: './uploads',
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const filename = `${uniqueSuffix}${extname(file.originalname)}`;
+        cb(null, filename);
+      },
+    }),
+  }),
+  )
+  createPost(@Body() dto: PostDto, @UploadedFile() file: Express.Multer.File) {
+    return this.postService.createPost(dto, file);
+  }
+
+  @Get('uploads/:id')
+  getFile(@Param('id') id: string): StreamableFile {
+    const image = createReadStream(join(process.cwd(), `uploads/${id}`));
+    console.log(image);
+    return new StreamableFile(image);
   }
 
   @Get(':id')
@@ -21,26 +44,6 @@ export class PostController {
     return this.postService.removePost(id);
   }
 
-  @Post('like')
-  addLike(@Body() dto: LikeDto) {
-    return this.postService.addLike(dto);
-  }
-
-  @Delete('like/:id')
-  removeLike(@Param('id') id: string) {
-    return this.postService.removeLike(id);
-  }
-
-  @Post('comment')
-  createComment(@Body() dto: CommentDto) {
-    return this.postService.createComment(dto);
-  }
-
-  @Get('comments/:id')
-  getComments(@Param('id') id: string) {
-    return this.postService.getComments(id);
-  }
-
   // Get all user's posts with likes and comments:
   @Get("userPosts/:username")
   userPosts(@Param('username') username: string) {
@@ -51,6 +54,11 @@ export class PostController {
   @Get('getPostsOfFollowing/:id')
   getPostsOfFollowing(@Param('id') id: string) {
     return this.postService.getPostsOfFollowing(id);
+  }
+
+  @Get('uploads/:fileId')
+  async serveAvatar(@Param('fileId') fileId: string, @Res() res): Promise<any> {
+    res.sendFile(fileId, { root: 'uploads' });
   }
 
 }

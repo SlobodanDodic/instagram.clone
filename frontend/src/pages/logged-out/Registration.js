@@ -9,83 +9,41 @@ import Bottom from "../../components/Form/Bottom";
 import { toast } from "react-toastify";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { Spinner } from "../../components/Spinner";
+import { useMutation } from "@tanstack/react-query";
+import { regInputs } from "../../components/Form/Inputs";
 
 const initialState = { username: '', email: '', password: '', confirmPassword: '' }
 
 export default function Registration() {
-  const { isLoading, setIsLoading, instance } = useContext(AuthContext);
+  const { instance } = useContext(AuthContext);
   const [form, setForm] = useState(initialState);
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useToggle(true)
 
   const signUpText = 'Sign up to see photos and videos from your friends.'
-  const regInputs = [
-    {
-      id: 1,
-      name: "username",
-      type: "text",
-      placeholder: "Username",
-      errorMessage: "Username should be 3-16 characters and shouldn't include any special character!",
-      pattern: "^[A-Za-z0-9]{3,16}$",
-      required: true,
-    },
-    {
-      id: 2,
-      name: "email",
-      type: "email",
-      placeholder: "Email",
-      errorMessage: "It should be a valid email address!",
-      required: true,
-    },
-    {
-      id: 3,
-      name: "password",
-      type: "password",
-      placeholder: "Password",
-      errorMessage: "Password should be 8-20 characters and include at least 1 letter, 1 number and 1 special character!",
-      pattern: `^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,20}$`,
-      required: true,
-    },
-    {
-      id: 4,
-      name: "confirmPassword",
-      type: "password",
-      placeholder: "Confirm Password",
-      errorMessage: "Passwords don't match!",
-      pattern: form.password,
-      required: true,
-    },
-  ];
 
   const onChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const registerAxios = async (data) => {
+    const res = await instance.post('auth/signup', data)
+    return res.data
+  }
+
+  const { isLoading, mutate: register } = useMutation(registerAxios, {
+    onError: (err) => toast.success("Error: ", err),
+    onSuccess: (res) => {
+      setForm(res);
+      toast.success('Successfully registered! Please check for conformation email and then log in... 👀', { autoClose: 5000 });
+      navigate('/')
+    }
+  })
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    instance
-      .post("auth/signup", form)
-      .then((res) => {
-        setForm(res);
-        console.log(res.data);
-        toast.success('Successfully registered! Please check for conformation email and then log in... 👀', { autoClose: 5000 });
-        navigate('/')
-      })
-      .catch((err) => {
-        if (err) {
-          toast.error('Email or Username already exists!')
-          console.log('Response - ' + err);
-        } else if (err.request) {
-          toast.error('Request - ' + err.request)
-          console.log('Request - ' + err.request);
-        } else {
-          toast.error('Error - ' + err.errorMessage)
-          console.log('Error - ' + err);
-        }
-      })
-      .finally(() => setIsLoading(false));
-  };
+    register(form)
+  }
 
   if (isLoading) return <Spinner />;
 
@@ -103,7 +61,7 @@ export default function Registration() {
 
           <div className="relative flex flex-col items-center justify-center">
             <form onSubmit={handleSubmit} className="w-full">
-              {regInputs.map((input) => (
+              {regInputs(form).map((input) => (
                 <FormInput key={input.id} {...input} onChange={onChange} show={showPassword} />
               ))}
               <button className="bg-blue-500 btn-add">Register</button>

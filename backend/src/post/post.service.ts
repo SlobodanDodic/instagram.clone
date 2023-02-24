@@ -1,18 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
-import { CommentDto, LikeDto, PostDto } from './dto/post.dto';
+import { PostDto } from './dto/post.dto';
 
 @Injectable()
 export class PostService {
   constructor(private prisma: PrismaService) { }
 
-  async createPost(dto: PostDto) {
-    const { author, caption, postImage } = dto;
+  async createPost(dto: PostDto, file: any) {
     return await this.prisma.post.create({
       data: {
-        caption,
-        postImage,
-        author: { connect: { username: author } },
+        caption: dto.caption,
+        postImage: file.path,
+        author: { connect: { username: dto.author } },
       },
     });
   }
@@ -29,39 +28,6 @@ export class PostService {
       where: { id: id },
     })
 
-  }
-
-  async addLike(dto: LikeDto) {
-    const { postId, userId } = dto;
-    return await this.prisma.like.create({
-      data: { userId: userId, postId: postId },
-      include: { post: true, user: true },
-    });
-  }
-
-  async removeLike(id: string) {
-    return await this.prisma.like.delete({
-      where: { id: id },
-    })
-  }
-
-  async createComment(dto: CommentDto) {
-    const { post, body, commentAuthor } = dto;
-    return await this.prisma.comment.create({
-      data: {
-        body: body,
-        post: { connect: { id: post } },
-        commentAuthor: { connect: { id: commentAuthor } },
-      },
-      include: { post: true, commentAuthor: true },
-    });
-  }
-
-  async getComments(id: string) {
-    return await this.prisma.comment.findMany({
-      where: { post: { id } },
-      include: { commentAuthor: true },
-    });
   }
 
   // Get all posts of following users:

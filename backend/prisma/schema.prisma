@@ -13,7 +13,7 @@ model User {
   username       String    @unique
   email          String    @unique
   hashedPassword String
-  token          String    @unique
+  token          String?   @unique
   isActivated    Boolean   @default(false)
   profileImage   String?
   bio            String?

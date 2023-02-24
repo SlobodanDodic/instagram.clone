@@ -4,35 +4,30 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Spinner } from '../../components/Spinner';
 import { BsCheck2Circle } from 'react-icons/bs';
+import { useMutation } from "@tanstack/react-query";
 
 export default function Activation() {
-  const { isLoading, setIsLoading, instance } = useContext(AuthContext);
-  const isActivated = true;
+  const { instance } = useContext(AuthContext);
   const navigate = useNavigate();
-  const { username } = useParams();
+  const { token } = useParams();
 
-  const handleSubmit = () => {
-    setIsLoading(true);
-    instance
-      .patch("auth/active/" + username, { isActivated })
-      .then((res) => {
-        toast.success('Successfully activated!');
-        navigate('/login')
-      })
-      .catch((err) => {
-        if (err) {
-          toast.error('Response - ' + err)
-          console.log('Response - ' + err);
-        } else if (err.request) {
-          toast.error('Request - ' + err.request)
-          console.log('Request - ' + err.request);
-        } else {
-          toast.error('Error - ' + err.errorMessage)
-          console.log('Error - ' + err);
-        }
-      })
-      .finally(() => setIsLoading(false));
-  };
+  const activationAxios = async (data) => {
+    const res = await instance.patch(`auth/activate/${token}`, data)
+    return res.data
+  }
+
+  const { isLoading, mutate: activation } = useMutation(activationAxios, {
+    onError: (err) => toast.success("Error: ", err),
+    onSuccess: (res) => {
+      toast.success('Successfully activated!');
+      navigate('/login')
+    }
+  })
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    activation({ isActivated: true })
+  }
 
   if (isLoading) return <Spinner />;
 

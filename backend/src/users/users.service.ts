@@ -1,5 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { Request } from 'express';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 
 @Injectable()
@@ -7,20 +6,17 @@ export class UsersService {
   constructor(private prisma: PrismaService) { }
 
   // Get logged user's profile:
-  async getMyUser(username: string, req: Request) {
-    const decodedUserInfo = req.user as { username: string; email: string };
-
+  async getMyProfile(refreshToken: string) {
     const foundUser = await this.prisma.user.findUnique({
-      where: { username },
+      where: { token: refreshToken },
       select: {
         id: true,
         bio: true,
         email: true,
         username: true,
-        hashedPassword: true,
         profileImage: true,
-        posts: { include: { likes: true, comments: true } },
-        followers: { include: { follower: true, following: true } },
+        // posts: { include: { author: true, likes: true, comments: { include: { commentAuthor: true } } } },
+        // followers: { include: { follower: true, following: true } },
         following: { include: { follower: true, following: true } }
       }
     });
@@ -28,12 +24,8 @@ export class UsersService {
     if (!foundUser) {
       throw new NotFoundException();
     }
-    if (foundUser.username !== decodedUserInfo.username) {
-      throw new ForbiddenException();
-    }
-    delete foundUser.hashedPassword;
 
-    return { user: foundUser };
+    return foundUser;
   }
 
   // Get users by search:
@@ -44,10 +36,11 @@ export class UsersService {
   }
 
   // Update logged user's profile:
-  async updateProfile(username: string, profileImage: string, bio: string) {
+  async updateProfile(refreshToken: string, bio: string, file: any) {
+    console.log(file);
     return this.prisma.user.update({
-      where: { username },
-      data: { profileImage: profileImage, bio: bio },
+      where: { token: refreshToken },
+      data: { profileImage: file.path, bio: bio },
     });
   }
 
@@ -68,54 +61,11 @@ export class UsersService {
     })
   }
 
-  // Follow user:
-  async follow(username: string, followerId: string, followingId: string) {
-    return await this.prisma.follows.createMany({
-      data: [{ followerId: followerId, followingId: followingId }],
-    });
-  }
+  // async setAvatar(username: string, avatarUrl: string) {
+  //   this.prisma.user.update({
+  //     where: { username: username },
+  //     data: { profileImage: avatarUrl }
+  //   });
+  // }
 
-  // Unfollow user:
-  async followRemove(username: string, followerId: string, followingId: string) {
-    return await this.prisma.follows.delete({
-      where: {
-        followerId_followingId: {
-          followerId: followerId,
-          followingId: followingId,
-        }
-      },
-    });
-  }
-
-  // Get all users that logged user follows and who is following him:
-  async findUserWithFollows(username: string) {
-    return await this.prisma.user.findUnique({
-      where: { username: username },
-      select: {
-        id: true,
-        username: true,
-        followers: { include: { follower: true, following: true } },
-        following: { include: { follower: true, following: true } }
-      }
-    })
-  }
-
-  // Get all following users of following users:
-  async discover(id: string) {
-    const usersArray = await this.usersArray(id);
-    const ids = usersArray?.following.map((id) => id.followingId);
-
-    return await this.prisma.user.findMany({
-      where: { id: { in: ids } },
-      select: { following: { select: { following: true } } },
-    });
-  }
-
-  // helper functions:
-  async usersArray(id: string) {
-    return await this.prisma.user.findUnique({
-      where: { id: id },
-      select: { following: { select: { followingId: true } } },
-    })
-  }
 }

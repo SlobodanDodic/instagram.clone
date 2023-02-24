@@ -9,67 +9,42 @@ import Bottom from "../../components/Form/Bottom";
 import { toast } from "react-toastify";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { Spinner } from "../../components/Spinner";
-
-const loginInputs = [
-  {
-    id: 1,
-    name: "username",
-    type: "text",
-    placeholder: "Username",
-    errorMessage: "Username should be 3-16 characters and shouldn't include any special character!",
-    pattern: "^[A-Za-z0-9]{3,16}$",
-    required: true,
-  },
-  {
-    id: 2,
-    name: "password",
-    type: "password",
-    placeholder: "Password",
-    errorMessage: "Password should be 8-20 characters and include at least 1 uppercase letter, 1 number and 1 special character!",
-    pattern: `^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,20}$`,
-    required: true,
-  },
-];
+import { useMutation } from "@tanstack/react-query";
+import { loginInputs } from "../../components/Form/Inputs";
 
 const initialState = { username: '', password: '' }
 
 export default function Login() {
-  const { setUser, isLoading, setIsLoading, instance } = useContext(AuthContext);
-
+  const { instance, setToken, setUser } = useContext(AuthContext);
   const [form, setForm] = useState(initialState);
   const [showPassword, setShowPassword] = useToggle(true)
   const navigate = useNavigate();
 
+  const loginAxios = async (data) => {
+    const res = await instance.post('auth/signin', data)
+    return res.data
+  }
+
+  const { isLoading, mutate: login } = useMutation(loginAxios, {
+    onError: (err) => toast.success("Error: ", err),
+    onSuccess: (res) => {
+      setUser(res?.loggedUser);
+      setToken(res?.refreshToken);
+      toast.success('Successfully logged!');
+      navigate('/')
+    }
+  })
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    instance
-      .post("auth/signin", form)
-      .then((res) => {
-        setUser(form.username);
-        toast.success('Successfully logged!');
-        navigate('/')
-      })
-      .catch((err) => {
-        if (err) {
-          toast.error('Response - ' + err)
-          console.log('Response - ' + err);
-        } else if (err.request) {
-          toast.error('Request - ' + err.request)
-          console.log('Request - ' + err.request);
-        } else {
-          toast.error('Error - ' + err.errorMessage)
-          console.log('Error - ' + err);
-        }
-      })
-      .finally(() => setIsLoading(false));
-  };
+    login(form)
+  }
 
   const onChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  if (isLoading) return <Spinner />;
+  if (isLoading) return <Spinner />
 
   return (
     <div className="flex flex-col items-center justify-center w-screen md:h-screen md:flex-row">
